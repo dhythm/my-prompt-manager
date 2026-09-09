@@ -21,7 +21,6 @@ export const messages = {
   },
   home: {
     title: "プロンプト",
-    lead: "ライブラリから選ぶか、新規作成してください。",
   },
   signIn: {
     title: "ログイン",
@@ -89,6 +88,7 @@ export const messages = {
     roleOwner: "オーナー",
     roleMember: "メンバー",
     loading: "読み込み中...",
+    pendingInvites: "招待",
   },
   project: {
     title: "プロジェクト",

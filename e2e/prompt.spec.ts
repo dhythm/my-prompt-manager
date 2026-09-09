@@ -2,7 +2,10 @@ import { expect, test } from "@playwright/test";
 
 test("creates a prompt with system and user messages", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "新規作成" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
   await expect(page.getByLabel("プロンプト名")).toBeVisible();
   await expect(page.getByLabel("システムプロンプト")).toBeVisible();
   await expect(page.getByLabel("ユーザープロンプト")).toBeVisible();
@@ -18,7 +21,8 @@ test("creates a prompt with system and user messages", async ({ page }) => {
   await page.getByRole("button", { name: "編集" }).click();
   await page.getByRole("button", { name: "実行を記録" }).click();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
-  await expect(page.getByText(/gpt-4.1 の実行を記録/)).toBeVisible();
+  await expect(page.getByText("Grok 4.6")).toBeVisible();
+  await expect(page.getByText(/Say hello/)).toBeVisible();
 });
 
 const systemV2 = [
@@ -61,7 +65,10 @@ const assistantV3 = [
 
 test("compares versions with a colored line diff", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "新規作成" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
   await page.getByLabel("プロンプト名").fill("Greeting");
   await page.getByLabel("システムプロンプト").fill(systemV2);
   await page.getByLabel("ユーザープロンプト").fill(userV2);

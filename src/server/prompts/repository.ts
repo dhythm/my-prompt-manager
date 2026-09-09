@@ -1,5 +1,6 @@
 import { and, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
+import { defaultPromptModel } from "@/lib/prompts/models";
 import { projects, prompts, teamMembers, teams } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createForbiddenError } from "@/server/errors";
@@ -88,7 +89,7 @@ export async function updatePrompt(
   const prompt = await getWritablePrompt(db, userId, promptId);
   const updated = await savePromptVersion(db, userId, prompt.id, {
     title: input.title,
-    model: "gpt-4.1",
+    model: defaultPromptModel,
     messages: [
       { role: "system", content: t("prompt.defaultSystem") },
       { role: "user", content: input.body },

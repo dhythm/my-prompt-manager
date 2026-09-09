@@ -24,7 +24,10 @@ test("creates a project and copies a prompt with version history", async ({
   });
 
   await page.getByLabel("プロジェクト").selectOption({ label: development });
-  await page.getByRole("button", { name: "新規作成" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
   await expect(page.getByLabel("プロンプト名")).toBeVisible();
 
   await page.getByLabel("プロンプト名").fill("Greeting");

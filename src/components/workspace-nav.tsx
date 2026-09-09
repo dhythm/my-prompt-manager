@@ -7,13 +7,8 @@ import {
 } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { t } from "@/lib/i18n/t";
-import {
-  readCurrentProjectId,
-  subscribeCurrentProjectId,
-  writeCurrentProjectId,
-} from "@/lib/projects/current";
+import { useCurrentProjectId } from "@/lib/projects/use-current-project-id";
 import { projectsQuery } from "@/lib/queries/projects";
 import { createPromptRequest, promptsQuery } from "@/lib/queries/prompts";
 
@@ -23,22 +18,7 @@ export function WorkspaceNav() {
   const queryClient = useQueryClient();
   const { data: prompts } = useSuspenseQuery(promptsQuery.options());
   const { data: projects } = useSuspenseQuery(projectsQuery.options());
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
-
-  useEffect(() => {
-    function syncProjectId() {
-      const stored = readCurrentProjectId();
-      const match = projects.find((project) => project.id === stored);
-      const next = match?.id ?? projects[0]?.id ?? "";
-      setProjectId(next);
-      if (next && next !== stored) {
-        writeCurrentProjectId(next);
-      }
-    }
-
-    syncProjectId();
-    return subscribeCurrentProjectId(syncProjectId);
-  }, [projects]);
+  const { projectId, selectProjectId } = useCurrentProjectId(projects);
 
   const visiblePrompts = projectId
     ? prompts.filter((prompt) => prompt.projectId === projectId)
@@ -82,9 +62,7 @@ export function WorkspaceNav() {
             value={projectId}
             aria-label={t("project.switcher")}
             onChange={(event) => {
-              const next = event.target.value;
-              setProjectId(next);
-              writeCurrentProjectId(next);
+              selectProjectId(event.target.value);
             }}
           >
             {projects.map((project) => (
@@ -99,7 +77,7 @@ export function WorkspaceNav() {
       ) : null}
 
       <button
-        className="rounded-md bg-[var(--accent)] px-3 py-2 text-left text-white"
+        className="rounded-md border border-white/15 px-3 py-2 text-left text-zinc-100 hover:bg-white/5"
         type="button"
         onClick={() => createPrompt.mutate()}
         disabled={createPrompt.isPending}
@@ -156,6 +134,7 @@ function SideLink({
       className={`rounded-md px-2 py-2 ${
         active ? "bg-white/10 text-white" : "text-zinc-300 hover:bg-white/5"
       }`}
+      aria-current={active ? "page" : undefined}
     >
       {children}
     </Link>

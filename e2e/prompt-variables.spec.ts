@@ -7,7 +7,10 @@ test("fills variables, previews expansion, and records expanded run input", asyn
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "新規作成" }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
   await expect(page.getByLabel("プロンプト名")).toBeVisible();
 
   await page.getByLabel("プロンプト名").fill("Variable greeting");
@@ -33,5 +36,5 @@ test("fills variables, previews expansion, and records expanded run input", asyn
   await page.getByRole("button", { name: "ログ", exact: true }).click();
   await expect(page.getByText("user: Hello Ada")).toBeVisible();
   await expect(page.getByText("{{name}}")).toHaveCount(0);
-  await expect(page.getByText(/gpt-4.1 の実行を記録/)).toBeVisible();
+  await expect(page.getByText("Grok 4.6")).toBeVisible();
 });

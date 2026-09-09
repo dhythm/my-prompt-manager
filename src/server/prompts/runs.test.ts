@@ -7,7 +7,7 @@ import {
 } from "@/server/auth/dummy/users";
 import { createPgliteDatabase } from "@/server/db/pglite";
 import { createPrompt } from "./repository";
-import { createPromptRun, listPromptRuns } from "./runs";
+import { createPromptRun, listPromptRuns, listWorkspaceRuns } from "./runs";
 import { getPromptDetail, savePromptVersion } from "./versions";
 
 const agentId = DUMMY_DEFAULT_USER_ID;
@@ -34,6 +34,17 @@ describe("prompt runs", () => {
     const logs = await listPromptRuns(db, agentId, prompt.id);
     expect(logs).toHaveLength(1);
     expect(logs[0]?.id).toBe(run.id);
+    expect(logs[0]?.promptTitle).toBe("Greeting");
+
+    const workspace = await listWorkspaceRuns(db, agentId);
+    expect(workspace).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: run.id,
+          promptTitle: "Greeting",
+        }),
+      ]),
+    );
   });
 
   it("stores expanded run input and keeps raw templates on the version", async () => {

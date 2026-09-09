@@ -64,6 +64,7 @@ export function serializeMessage(message: {
 export function serializeRun(run: {
   id: string;
   promptId: string;
+  promptTitle: string;
   model: string;
   input: string;
   output: string;
@@ -73,6 +74,7 @@ export function serializeRun(run: {
   return {
     id: run.id,
     promptId: run.promptId,
+    promptTitle: run.promptTitle,
     model: run.model,
     input: run.input,
     output: run.output,

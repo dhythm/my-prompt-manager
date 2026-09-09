@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { PromptsPanel } from "@/components/prompts-panel";
 import { t } from "@/lib/i18n/t";
 import { getCurrentUser } from "@/server/auth/current-user";
 
@@ -11,11 +13,19 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex h-full flex-col justify-center gap-3 px-8 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">
-        {t("home.title")}
-      </h1>
-      <p className="max-w-md text-[var(--muted)]">{t("home.lead")}</p>
+    <main className="flex flex-col gap-4 p-6">
+      <Suspense
+        fallback={
+          <>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {t("home.title")}
+            </h1>
+            <p className="text-sm">{t("prompt.loading")}</p>
+          </>
+        }
+      >
+        <PromptsPanel />
+      </Suspense>
     </main>
   );
 }

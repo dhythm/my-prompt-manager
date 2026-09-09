@@ -47,6 +47,7 @@ export type PromptVersionDetail = {
 export type PromptRun = {
   id: string;
   promptId: string;
+  promptTitle: string;
   model: string;
   input: string;
   output: string;

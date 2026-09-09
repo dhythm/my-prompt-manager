@@ -30,7 +30,7 @@ describe("prompt versions", () => {
 
     const detail = await getPromptDetail(db, agentId, prompt.id);
     expect(detail.version.versionNumber).toBe(1);
-    expect(detail.version.model).toBe("gpt-4.1");
+    expect(detail.version.model).toBe("grok-4.6");
     expect(detail.messages.map((message) => message.role)).toEqual([
       "system",
       "user",

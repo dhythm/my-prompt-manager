@@ -8,12 +8,13 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PromptHistory } from "@/components/prompt-history";
+import { PromptRunCard } from "@/components/prompt-run-card";
 import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
 import { t } from "@/lib/i18n/t";
 import { writeCurrentProjectId } from "@/lib/projects/current";
-import { promptModels } from "@/lib/prompts/models";
+import { promptModelOptions } from "@/lib/prompts/models";
 import {
   extractVariablesFromTexts,
   filledValues,
@@ -208,7 +209,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               value={model}
               onChange={(event) => setModel(event.target.value)}
             >
-              {promptModels.map((item) => (
+              {promptModelOptions(model).map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.label}
                 </option>
@@ -351,23 +352,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               {t("prompt.emptyRuns")}
             </p>
           ) : (
-            runs.map((run) => (
-              <article
-                key={run.id}
-                className="rounded-md border border-[var(--line)] bg-white p-4"
-              >
-                <p className="text-sm font-medium">{run.model}</p>
-                <p className="mt-2 text-xs text-[var(--muted)]">
-                  {t("prompt.runInput")}
-                </p>
-                <pre className="prompt-mono mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
-                  {run.input}
-                </pre>
-                <pre className="prompt-mono mt-2 overflow-x-auto text-xs text-[var(--muted)]">
-                  {run.output}
-                </pre>
-              </article>
-            ))
+            runs.map((run) => <PromptRunCard key={run.id} run={run} />)
           )}
         </div>
       ) : null}

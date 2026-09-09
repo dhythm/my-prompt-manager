@@ -1,7 +1,7 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
 import { substitute } from "@/lib/prompts/template";
-import { promptRuns } from "@/server/db/schema";
+import { promptRuns, prompts } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { getReadablePrompt } from "./access";
 import { listPrompts } from "./repository";
@@ -41,7 +41,7 @@ export async function createPromptRun(
     throw new Error(t("error.runRecordFailed"));
   }
 
-  return run;
+  return { ...run, promptTitle: detail.prompt.title };
 }
 
 export async function listPromptRuns(
@@ -51,8 +51,20 @@ export async function listPromptRuns(
 ) {
   await getReadablePrompt(db, userId, promptId);
   return db
-    .select()
+    .select({
+      id: promptRuns.id,
+      promptId: promptRuns.promptId,
+      promptTitle: prompts.title,
+      versionId: promptRuns.versionId,
+      model: promptRuns.model,
+      input: promptRuns.input,
+      output: promptRuns.output,
+      status: promptRuns.status,
+      createdByUserId: promptRuns.createdByUserId,
+      createdAt: promptRuns.createdAt,
+    })
     .from(promptRuns)
+    .innerJoin(prompts, eq(prompts.id, promptRuns.promptId))
     .where(eq(promptRuns.promptId, promptId))
     .orderBy(desc(promptRuns.createdAt));
 }
@@ -65,8 +77,20 @@ export async function listWorkspaceRuns(db: AppDatabase, userId: string) {
   }
 
   return db
-    .select()
+    .select({
+      id: promptRuns.id,
+      promptId: promptRuns.promptId,
+      promptTitle: prompts.title,
+      versionId: promptRuns.versionId,
+      model: promptRuns.model,
+      input: promptRuns.input,
+      output: promptRuns.output,
+      status: promptRuns.status,
+      createdByUserId: promptRuns.createdByUserId,
+      createdAt: promptRuns.createdAt,
+    })
     .from(promptRuns)
+    .innerJoin(prompts, eq(prompts.id, promptRuns.promptId))
     .where(inArray(promptRuns.promptId, ids))
     .orderBy(desc(promptRuns.createdAt));
 }

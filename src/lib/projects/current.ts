@@ -14,3 +14,14 @@ export function subscribeCurrentProjectId(onChange: () => void) {
   window.addEventListener(CURRENT_PROJECT_EVENT, onChange);
   return () => window.removeEventListener(CURRENT_PROJECT_EVENT, onChange);
 }
+
+export function resolveCurrentProjectId(
+  projects: Array<{ id: string }>,
+  stored: string | null,
+) {
+  return (
+    projects.find((project) => project.id === stored)?.id ??
+    projects[0]?.id ??
+    ""
+  );
+}

@@ -40,11 +40,17 @@ export default async function TeamsPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <main className="p-6">
-        <h1 className="mb-4 text-2xl font-semibold tracking-tight">
-          {t("team.title")}
-        </h1>
-        <Suspense fallback={<p className="text-sm">{t("team.loading")}</p>}>
+      <main className="flex flex-col gap-4 p-6">
+        <Suspense
+          fallback={
+            <>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {t("team.title")}
+              </h1>
+              <p className="text-sm">{t("team.loading")}</p>
+            </>
+          }
+        >
           <TeamsPanel />
         </Suspense>
       </main>
