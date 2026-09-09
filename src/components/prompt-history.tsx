@@ -97,7 +97,8 @@ export function PromptHistory({
         ) : null}
       </div>
 
-      {fromVersion != null && !diff ? (
+      {(fromVersion != null && !diff) ||
+      (fromVersion == null && !toQuery.data) ? (
         <p className="text-sm text-[var(--muted)]">{t("prompt.loading")}</p>
       ) : null}
       {fromVersion == null && toQuery.data ? (
