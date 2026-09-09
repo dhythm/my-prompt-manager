@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -17,7 +18,7 @@ export async function GET() {
     const prompts = await listPrompts(db, user.id);
     return NextResponse.json({ prompts: prompts.map(serializePrompt) });
   } catch (error) {
-    return errorResponse(error, "Failed to load prompts");
+    return errorResponse(error, t("error.promptsLoadFailed"));
   }
 }
 
@@ -36,6 +37,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return errorResponse(error, "Failed to create prompt");
+    return errorResponse(error, t("error.promptCreateFailed"));
   }
 }

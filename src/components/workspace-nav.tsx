@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { t } from "@/lib/i18n/t";
 import { createPromptRequest, promptsQuery } from "@/lib/queries/prompts";
 
 export function WorkspaceNav() {
@@ -16,7 +17,8 @@ export function WorkspaceNav() {
   const { data: prompts } = useSuspenseQuery(promptsQuery.options());
 
   const createPrompt = useMutation({
-    mutationFn: () => createPromptRequest({ title: "Untitled", body: "" }),
+    mutationFn: () =>
+      createPromptRequest({ title: t("prompt.untitled"), body: "" }),
     onSuccess: async (prompt) => {
       await queryClient.invalidateQueries({ queryKey: promptsQuery.key });
       router.push(`/prompts/${prompt.id}`);
@@ -27,13 +29,13 @@ export function WorkspaceNav() {
     <aside className="flex w-64 shrink-0 flex-col gap-6 bg-[var(--panel)] px-4 py-5 text-sm text-zinc-200">
       <nav className="flex flex-col gap-1">
         <SideLink href="/" active={pathname === "/"}>
-          Prompts
+          {t("nav.prompts")}
         </SideLink>
         <SideLink href="/runs" active={pathname === "/runs"}>
-          Logs
+          {t("nav.logs")}
         </SideLink>
         <SideLink href="/teams" active={pathname.startsWith("/teams")}>
-          Teams
+          {t("nav.teams")}
         </SideLink>
       </nav>
 
@@ -43,13 +45,13 @@ export function WorkspaceNav() {
         onClick={() => createPrompt.mutate()}
         disabled={createPrompt.isPending}
       >
-        {createPrompt.isPending ? "Creating..." : "New prompt"}
+        {createPrompt.isPending ? t("nav.creating") : t("nav.newPrompt")}
       </button>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-        <p className="text-xs text-zinc-400">Library</p>
+        <p className="text-xs text-zinc-400">{t("nav.library")}</p>
         {prompts.length === 0 ? (
-          <p className="text-zinc-500">No prompts yet.</p>
+          <p className="text-zinc-500">{t("nav.emptyPrompts")}</p>
         ) : (
           <ul className="flex flex-col gap-1">
             {prompts.map((prompt) => {
@@ -67,7 +69,7 @@ export function WorkspaceNav() {
                   >
                     <span className="block truncate">{prompt.title}</span>
                     <span className="block truncate text-xs text-zinc-500">
-                      {prompt.teamName ?? "Personal"}
+                      {prompt.teamName ?? t("nav.personal")}
                     </span>
                   </Link>
                 </li>

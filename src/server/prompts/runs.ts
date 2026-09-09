@@ -1,4 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { promptRuns } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { getReadablePrompt } from "./access";
@@ -14,7 +15,10 @@ export async function createPromptRun(
   const input = detail.messages
     .map((message) => `${message.role}: ${message.content}`)
     .join("\n\n");
-  const output = `Recorded ${detail.version.model} run with ${detail.messages.length} messages.`;
+  const output = t("prompt.recordedRun", {
+    model: detail.version.model,
+    count: detail.messages.length,
+  });
 
   const [run] = await db
     .insert(promptRuns)
@@ -30,7 +34,7 @@ export async function createPromptRun(
     .returning();
 
   if (!run) {
-    throw new Error("Failed to record run");
+    throw new Error(t("error.runRecordFailed"));
   }
 
   return run;

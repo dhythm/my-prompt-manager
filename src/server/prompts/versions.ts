@@ -1,4 +1,5 @@
 import { desc, eq } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { defaultPromptModel } from "@/lib/prompts/models";
 import { promptMessages, prompts, promptVersions } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
@@ -21,7 +22,7 @@ export async function createInitialPromptVersion(
     userId,
     versionNumber: 1,
     model: defaultPromptModel,
-    note: "Created",
+    note: t("prompt.createdNote"),
     title: input.title,
     messages: defaultMessages(input.body),
   });
@@ -45,7 +46,7 @@ export async function savePromptVersion(
     userId,
     versionNumber: latest + 1,
     model: input.model,
-    note: input.note ?? "Updated",
+    note: input.note ?? t("prompt.updatedNote"),
     title: input.title,
     messages: input.messages,
   });
@@ -67,7 +68,7 @@ export async function getPromptDetail(
     .limit(1);
 
   if (!version) {
-    throw createNotFoundError("Prompt version not found");
+    throw createNotFoundError(t("error.promptVersionNotFound"));
   }
 
   const messages = await db
@@ -127,7 +128,7 @@ async function insertVersion(
     .returning();
 
   if (!version) {
-    throw new Error("Failed to save prompt version");
+    throw new Error(t("error.versionSaveFailed"));
   }
 
   if (input.messages.length > 0) {
@@ -153,7 +154,7 @@ async function insertVersion(
     .returning();
 
   if (!prompt) {
-    throw new Error("Failed to update prompt");
+    throw new Error(t("error.promptUpdateFailed"));
   }
 
   return { prompt, version };
@@ -161,7 +162,7 @@ async function insertVersion(
 
 function defaultMessages(body: string): PromptMessageInput[] {
   return [
-    { role: "system", content: "You are a helpful assistant." },
+    { role: "system", content: t("prompt.defaultSystem") },
     { role: "user", content: body },
   ];
 }

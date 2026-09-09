@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { t } from "@/lib/i18n/t";
 import { workspaceRunsQuery } from "@/lib/queries/prompt-detail";
 import { getQueryClient } from "@/lib/query/get-query-client";
 import { getCurrentUser } from "@/server/auth/current-user";
@@ -25,8 +26,10 @@ export default async function RunsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="flex flex-col gap-4 p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Logs</h1>
-        <Suspense fallback={<p className="text-sm">Loading...</p>}>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {t("runs.title")}
+        </h1>
+        <Suspense fallback={<p className="text-sm">{t("runs.loading")}</p>}>
           <RunsList />
         </Suspense>
       </main>

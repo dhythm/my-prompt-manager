@@ -1,4 +1,5 @@
 import { and, eq } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { teamMembers, teams } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createForbiddenError, createNotFoundError } from "@/server/errors";
@@ -20,7 +21,7 @@ export async function assertMember(
 ) {
   const membership = await getMembership(db, userId, teamId);
   if (!membership) {
-    throw createForbiddenError("not a team member");
+    throw createForbiddenError(t("error.notTeamMember"));
   }
   return membership;
 }
@@ -32,7 +33,7 @@ export async function assertOwner(
 ) {
   const membership = await getMembership(db, userId, teamId);
   if (membership?.role !== "owner") {
-    throw createForbiddenError("not a team owner");
+    throw createForbiddenError(t("error.notTeamOwner"));
   }
   return membership;
 }
@@ -44,7 +45,7 @@ export async function requireTeam(db: AppDatabase, teamId: string) {
     .where(eq(teams.id, teamId))
     .limit(1);
   if (!team) {
-    throw createNotFoundError("Team not found");
+    throw createNotFoundError(t("error.teamNotFound"));
   }
   return team;
 }

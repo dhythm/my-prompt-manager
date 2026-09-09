@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { prompts, teamMembers, teams } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createForbiddenError } from "@/server/errors";
@@ -57,7 +58,7 @@ export async function createPrompt(
     .returning();
 
   if (!prompt) {
-    throw new Error("Failed to create prompt");
+    throw new Error(t("error.promptCreateFailed"));
   }
 
   await createInitialPromptVersion(db, userId, prompt.id, {
@@ -79,7 +80,7 @@ export async function updatePrompt(
     title: input.title,
     model: "gpt-4.1",
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
+      { role: "system", content: t("prompt.defaultSystem") },
       { role: "user", content: input.body },
     ],
   });
@@ -94,7 +95,7 @@ export async function transferPrompt(
 ) {
   const prompt = await findPrompt(db, promptId);
   if (prompt.ownerUserId !== userId) {
-    throw createForbiddenError("Only the owner can transfer a personal prompt");
+    throw createForbiddenError(t("error.transferOwnerOnly"));
   }
 
   await assertMember(db, userId, teamId);
@@ -110,7 +111,7 @@ export async function transferPrompt(
     .returning();
 
   if (!updated) {
-    throw new Error("Failed to transfer prompt");
+    throw new Error(t("error.transferFailed"));
   }
 
   return updated;

@@ -2,6 +2,7 @@
 
 import { postJson } from "@/lib/api/http";
 import type { SessionUser } from "@/lib/auth/types";
+import { t } from "@/lib/i18n/t";
 
 export function AccountBar({
   user,
@@ -14,7 +15,7 @@ export function AccountBar({
 }) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-3">
-      <p className="text-sm font-medium">Prompt Manager</p>
+      <p className="text-sm font-medium">{t("app.title")}</p>
       {user ? (
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <p>
@@ -33,7 +34,7 @@ export function AccountBar({
                       void switchUser(dummyUser.email);
                     }}
                   >
-                    Use {dummyUser.name}
+                    {t("account.useUser", { name: dummyUser.name })}
                   </button>
                 ))
             : null}
@@ -44,12 +45,12 @@ export function AccountBar({
               void signOut();
             }}
           >
-            Sign out
+            {t("account.signOut")}
           </button>
         </div>
       ) : (
         <a className="text-sm underline" href="/sign-in">
-          Sign in
+          {t("account.signIn")}
         </a>
       )}
     </header>

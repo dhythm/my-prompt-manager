@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { t } from "@/lib/i18n/t";
 import {
   DUMMY_DEFAULT_USER_ID,
   dummyUsers,
@@ -65,7 +66,7 @@ describe("teams repository", () => {
 
     await expect(
       createInvite(db, developerId, team.id, { email: "dev@local.test" }),
-    ).rejects.toThrowError(/not a team owner/);
+    ).rejects.toThrowError(t("error.notTeamOwner"));
   });
 
   async function openDatabase() {
