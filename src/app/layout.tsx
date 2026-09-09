@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="ja" className={`${sans.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-[var(--paper)] text-[var(--ink)] antialiased">
+      <body className="flex h-dvh flex-col overflow-hidden bg-[var(--paper)] text-[var(--ink)] antialiased">
         <Providers>
           <AccountBar
             user={user}
@@ -69,19 +69,21 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           />
           {user ? (
             <HydrationBoundary state={dehydrate(queryClient)}>
-              <div className="flex min-h-[calc(100vh-3.25rem)]">
+              <div className="flex min-h-0 flex-1">
                 <Suspense
                   fallback={
-                    <aside className="w-64 shrink-0 bg-[var(--panel)]" />
+                    <aside className="h-full w-64 shrink-0 bg-[var(--panel)]" />
                   }
                 >
                   <WorkspaceNav />
                 </Suspense>
-                <div className="min-w-0 flex-1">{children}</div>
+                <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+                  {children}
+                </div>
               </div>
             </HydrationBoundary>
           ) : (
-            children
+            <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
           )}
         </Providers>
       </body>

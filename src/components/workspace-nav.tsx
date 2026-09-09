@@ -38,7 +38,7 @@ export function WorkspaceNav() {
   });
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col gap-6 bg-[var(--panel)] px-4 py-5 text-sm text-zinc-200">
+    <aside className="flex h-full w-64 shrink-0 flex-col gap-6 overflow-hidden bg-[var(--panel)] px-4 py-5 text-sm text-zinc-200">
       <nav className="flex flex-col gap-1">
         <SideLink href="/" active={pathname === "/"}>
           {t("nav.prompts")}

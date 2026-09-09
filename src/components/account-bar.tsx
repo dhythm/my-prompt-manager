@@ -14,7 +14,7 @@ export function AccountBar({
   provider: "dummy" | "clerk";
 }) {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-3">
+    <header className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-3">
       <p className="text-sm font-medium">{t("app.title")}</p>
       {user ? (
         <div className="flex flex-wrap items-center gap-3 text-sm">
