@@ -63,7 +63,6 @@ export const messages = {
   },
   team: {
     title: "チーム",
-    heading: "チーム",
     empty: "チームはまだありません",
     namePlaceholder: "チーム名",
     create: "チームを作成",

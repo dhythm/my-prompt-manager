@@ -74,7 +74,6 @@ export function TeamsPanel() {
 
   return (
     <section className="flex flex-col gap-6 rounded-md border border-zinc-200 bg-white p-4">
-      <h2 className="font-medium">{t("team.heading")}</h2>
       <ul className="text-sm">
         {teams.length === 0 ? (
           <li className="text-zinc-600">{t("team.empty")}</li>

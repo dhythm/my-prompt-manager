@@ -13,10 +13,10 @@ test("creates a prompt with system and user messages", async ({ page }) => {
   await expect(page.getByText("バージョン 2")).toBeVisible();
 
   await page.getByRole("button", { name: "履歴" }).click();
-  await expect(page.getByText("作成")).toBeVisible();
+  await expect(page.getByText("作成", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "編集" }).click();
   await page.getByRole("button", { name: "実行を記録" }).click();
-  await page.getByRole("button", { name: "ログ" }).click();
+  await page.getByRole("button", { name: "ログ", exact: true }).click();
   await expect(page.getByText(/gpt-4.1 の実行を記録/)).toBeVisible();
 });

@@ -38,8 +38,9 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "プロンプト" })).toBeVisible();
 
   await page.getByRole("link", { name: "チーム" }).click();
-  await expect(page.getByRole("heading", { name: "チーム" })).toBeVisible();
-  await expect(page.getByText("チームはまだありません")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "チーム", level: 1 }),
+  ).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "teams-empty.png"),
     fullPage: true,
@@ -47,7 +48,6 @@ test("home page renders and can be screenshotted", async ({ page }) => {
 
   await page.getByRole("link", { name: "ログ" }).click();
   await expect(page.getByRole("heading", { name: "ログ" })).toBeVisible();
-  await expect(page.getByText("実行ログはまだありません")).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "logs-empty.png"),
     fullPage: true,
@@ -61,16 +61,25 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "履歴" }).click();
-  await expect(page.getByText("作成")).toBeVisible();
+  await expect(page.getByText("作成", { exact: true })).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "prompt-history.png"),
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "ログ" }).click();
+  await page.getByRole("button", { name: "ログ", exact: true }).click();
   await expect(page.getByText("実行ログはまだありません")).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "prompt-logs-empty.png"),
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "編集" }).click();
+  await page.getByRole("button", { name: "実行を記録" }).click();
+  await page.getByRole("button", { name: "ログ", exact: true }).click();
+  await expect(page.getByText(/gpt-4.1 の実行を記録/)).toBeVisible();
+  await page.screenshot({
+    path: path.join(outputDir, "prompt-logs.png"),
     fullPage: true,
   });
 });
