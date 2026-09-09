@@ -62,6 +62,7 @@ test("home page renders and can be screenshotted", async ({ page }) => {
 
   await page.getByRole("button", { name: "履歴" }).click();
   await expect(page.getByText("作成", { exact: true })).toBeVisible();
+  await expect(page.getByText("メッセージ 1")).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "prompt-history.png"),
     fullPage: true,

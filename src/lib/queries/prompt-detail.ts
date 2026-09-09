@@ -4,6 +4,7 @@ import type {
   PromptDetail,
   PromptRun,
   PromptVersion,
+  PromptVersionDetail,
 } from "@/lib/prompts/types";
 
 export const promptDetailQuery = {
@@ -27,6 +28,20 @@ export const promptVersionsQuery = {
         );
         return data.versions;
       },
+      staleTime: 60_000,
+    }),
+};
+
+export const promptVersionDetailQuery = {
+  key: (id: string, versionNumber: number) =>
+    ["prompt-version", id, versionNumber] as const,
+  options: (id: string, versionNumber: number) =>
+    queryOptions({
+      queryKey: promptVersionDetailQuery.key(id, versionNumber),
+      queryFn: async () =>
+        getJson<PromptVersionDetail>(
+          `/api/prompts/${id}/versions/${versionNumber}`,
+        ),
       staleTime: 60_000,
     }),
 };

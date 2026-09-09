@@ -7,6 +7,7 @@ import { createPgliteDatabase } from "@/server/db/pglite";
 import { createPrompt } from "./repository";
 import {
   getPromptDetail,
+  getPromptVersion,
   listPromptVersions,
   savePromptVersion,
 } from "./versions";
@@ -58,6 +59,29 @@ describe("prompt versions", () => {
     expect(versions.map((version) => version.versionNumber)).toEqual([2, 1]);
     expect(versions[0]?.model).toBe("claude-sonnet-4");
     expect(versions[0]?.note).toBe("Switch model");
+
+    const first = await getPromptVersion(db, agentId, prompt.id, 1);
+    expect(first.version.versionNumber).toBe(1);
+    expect(first.messages[1]?.content).toBe("Say hello");
+
+    const second = await getPromptVersion(db, agentId, prompt.id, 2);
+    expect(second.version.model).toBe("claude-sonnet-4");
+    expect(second.messages.map((message) => message.content)).toEqual([
+      "You are terse.",
+      "Say hello in one word.",
+    ]);
+  });
+
+  it("does not find a missing version number", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+
+    await expect(
+      getPromptVersion(db, agentId, prompt.id, 9),
+    ).rejects.toMatchObject({ name: "NotFoundError" });
   });
 
   async function openDatabase() {

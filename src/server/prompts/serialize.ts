@@ -1,4 +1,9 @@
-import type { Prompt, PromptRun, PromptVersion } from "@/lib/prompts/types";
+import type {
+  Prompt,
+  PromptMessage,
+  PromptRun,
+  PromptVersion,
+} from "@/lib/prompts/types";
 
 export function serializePrompt(prompt: {
   id: string;
@@ -35,6 +40,20 @@ export function serializeVersion(version: {
     model: version.model,
     note: version.note,
     createdAt: version.createdAt.toISOString(),
+  };
+}
+
+export function serializeMessage(message: {
+  id: string;
+  role: string;
+  content: string;
+  position: number;
+}): PromptMessage {
+  return {
+    id: message.id,
+    role: message.role as PromptMessage["role"],
+    content: message.content,
+    position: message.position,
   };
 }
 
