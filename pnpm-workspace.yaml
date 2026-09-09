@@ -1,5 +1,6 @@
 onlyBuiltDependencies:
   - esbuild
+  - agent-browser
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver

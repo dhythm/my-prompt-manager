@@ -106,4 +106,22 @@ fad research, exploration, and parallel analysis to subagents
 - default database is PGlite at `.data/pglite` (no Docker / DATABASE_URL required)
 - set `DATABASE_URL` (postgres/postgresql) to use PostgreSQL, Neon, or Supabase
 - client-to-server reads go through Route Handlers and TanStack Query; do not use Server Actions as `queryFn`
+- take UI screenshots with Playwright (`pnpm screenshot`) or agent-browser; first time run `pnpm browser:install`
+
+### Screenshots
+
+Playwright starts the app if needed and writes PNGs to `e2e/output/`:
+
+```bash
+pnpm screenshot
+```
+
+agent-browser is for ad-hoc inspection while `pnpm dev` is already running:
+
+```bash
+pnpm exec agent-browser open http://127.0.0.1:3000
+pnpm exec agent-browser snapshot -i
+pnpm exec agent-browser screenshot --full e2e/output/page.png
+pnpm exec agent-browser close
+```
 

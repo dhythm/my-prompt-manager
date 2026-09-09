@@ -8,7 +8,7 @@ Next.js app for managing prompts. Local and agent environments use PGlite. Produ
 - TanStack Query for client-to-server data
 - Drizzle ORM
 - PGlite by default, `postgres.js` for PostgreSQL
-- Vitest, knip, `tsc`, GitHub Actions
+- Vitest, Playwright, agent-browser, knip, `tsc`, GitHub Actions
 
 ## Setup
 
@@ -59,6 +59,9 @@ Neon and Supabase both work with the `postgres` driver. Transaction poolers need
 | --- | --- |
 | `pnpm dev` | Next.js dev server |
 | `pnpm test` | Vitest |
+| `pnpm test:e2e` | Playwright (starts the app, takes screenshots) |
+| `pnpm screenshot` | Desktop + mobile PNGs in `e2e/output/` |
+| `pnpm browser:install` | Chromium for Playwright and agent-browser |
 | `pnpm lint` | Biome CI (lint + format) |
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm knip` | Unused files / exports / deps |
@@ -67,4 +70,29 @@ Neon and Supabase both work with the `postgres` driver. Transaction poolers need
 | `pnpm db:migrate` | Apply SQL migrations (PostgreSQL) |
 | `pnpm db:studio` | Drizzle Studio |
 
-CI runs lint, typecheck, knip, test, and build.
+CI runs lint, typecheck, knip, test, Playwright screenshots, and build.
+
+## Screenshots
+
+First time on a machine:
+
+```bash
+pnpm browser:install
+```
+
+Then:
+
+```bash
+pnpm screenshot
+```
+
+That writes `e2e/output/home-desktop.png` and `e2e/output/home-mobile.png`.
+
+With the app already running, agent-browser can snapshot and screenshot:
+
+```bash
+pnpm exec agent-browser open http://127.0.0.1:3000
+pnpm exec agent-browser snapshot -i
+pnpm exec agent-browser screenshot --full e2e/output/page.png
+pnpm exec agent-browser close
+```
