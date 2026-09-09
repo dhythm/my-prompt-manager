@@ -5,6 +5,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PromptHistory } from "@/components/prompt-history";
 import { PromptVariablesPanel } from "@/components/prompt-variables";
@@ -19,6 +20,7 @@ import {
   substitute,
 } from "@/lib/prompts/template";
 import type { PromptMessage, PromptVersionDetail } from "@/lib/prompts/types";
+import { copyPromptRequest, projectsQuery } from "@/lib/queries/projects";
 import {
   promptDetailQuery,
   promptRunsQuery,
@@ -32,11 +34,13 @@ type Tab = "editor" | "history" | "logs";
 
 export function PromptWorkspace({ promptId }: { promptId: string }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { data } = useSuspenseQuery(promptDetailQuery.options(promptId));
   const { data: versions } = useSuspenseQuery(
     promptVersionsQuery.options(promptId),
   );
   const { data: runs } = useSuspenseQuery(promptRunsQuery.options(promptId));
+  const { data: projects } = useSuspenseQuery(projectsQuery.options());
   const [tab, setTab] = useState<Tab>("editor");
   const [title, setTitle] = useState(data.prompt.title);
   const [model, setModel] = useState(data.version.model);
@@ -46,6 +50,12 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       ...message,
       id: message.id ?? crypto.randomUUID(),
     })),
+  );
+  const copyTargets = projects.filter(
+    (project) => project.id !== data.prompt.projectId,
+  );
+  const [targetProjectId, setTargetProjectId] = useState(
+    copyTargets[0]?.id ?? "",
   );
   const [error, setError] = useState<string | undefined>();
   const [variableValues, setVariableValues] = useState<Record<string, string>>(
@@ -118,6 +128,21 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
     },
   });
 
+  const copyPrompt = useMutation({
+    mutationFn: () => copyPromptRequest(promptId, targetProjectId),
+    onSuccess: async (prompt) => {
+      setError(undefined);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: promptsQuery.key }),
+        queryClient.invalidateQueries({ queryKey: projectsQuery.key }),
+      ]);
+      router.push(`/prompts/${prompt.id}`);
+    },
+    onError: (err) => {
+      setError(isHttpError(err) ? err.message : t("project.copyFailed"));
+    },
+  });
+
   return (
     <section className="flex min-h-full flex-col gap-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -130,6 +155,32 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
         <p className="text-sm text-[var(--muted)]">
           {t("prompt.version", { number: data.version.versionNumber })}
         </p>
+        {copyTargets.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              className="rounded-md border border-[var(--line)] bg-white px-3 py-2 text-sm"
+              value={targetProjectId}
+              onChange={(event) => setTargetProjectId(event.target.value)}
+              aria-label={t("project.copyTarget")}
+            >
+              {copyTargets.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.teamName
+                    ? `${project.name} · ${project.teamName}`
+                    : project.name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="rounded-md border border-[var(--line)] px-3 py-2 text-sm"
+              type="button"
+              onClick={() => copyPrompt.mutate()}
+              disabled={copyPrompt.isPending || !targetProjectId}
+            >
+              {copyPrompt.isPending ? t("project.copying") : t("project.copy")}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex gap-2">

@@ -68,3 +68,7 @@ export async function patchJson<T>(
     body: JSON.stringify(body),
   });
 }
+
+export async function deleteJson<T>(input: RequestInfo | URL): Promise<T> {
+  return getJson<T>(input, { method: "DELETE" });
+}

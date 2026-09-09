@@ -10,10 +10,12 @@ const BODY_MAX_LENGTH = 10_000;
 export function parseCreatePromptInput(value: unknown): CreatePromptInput {
   const record = asObject(value);
   const teamId = parseOptionalId(record.teamId, "field.teamId");
+  const projectId = parseOptionalId(record.projectId, "field.projectId");
   return {
     title: parseRequiredText(record.title, "field.title", TITLE_MAX_LENGTH),
     body: parseOptionalBody(record.body),
     ...(teamId ? { teamId } : {}),
+    ...(projectId ? { projectId } : {}),
   };
 }
 
