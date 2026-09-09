@@ -17,6 +17,50 @@ export function parseCreatePromptInput(value: unknown): CreatePromptInput {
   };
 }
 
+const VARIABLE_NAME = /^[A-Za-z0-9_]+$/;
+const VARIABLE_VALUE_MAX_LENGTH = 10_000;
+
+export function parseRecordRunInput(value: unknown): {
+  variables: Record<string, string>;
+} {
+  if (value === undefined || value === null) {
+    return { variables: {} };
+  }
+  const record = asObject(value);
+  if (record.variables === undefined || record.variables === null) {
+    return { variables: {} };
+  }
+  if (typeof record.variables !== "object" || Array.isArray(record.variables)) {
+    throw createValidationError(t("validation.variablesObject"));
+  }
+
+  const variables: Record<string, string> = {};
+  for (const [name, raw] of Object.entries(
+    record.variables as Record<string, unknown>,
+  )) {
+    if (!VARIABLE_NAME.test(name)) {
+      throw createValidationError(
+        t("validation.variableNameInvalid", { name }),
+      );
+    }
+    if (typeof raw !== "string") {
+      throw createValidationError(
+        t("validation.variableValueMustBeString", { name }),
+      );
+    }
+    if (raw.length > VARIABLE_VALUE_MAX_LENGTH) {
+      throw createValidationError(
+        t("validation.variableValueMax", {
+          name,
+          max: VARIABLE_VALUE_MAX_LENGTH,
+        }),
+      );
+    }
+    variables[name] = raw;
+  }
+  return { variables };
+}
+
 export function parseSavePromptInput(value: unknown): {
   title: string;
   model: string;

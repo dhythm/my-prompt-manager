@@ -5,11 +5,18 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
 import { t } from "@/lib/i18n/t";
 import { promptModels } from "@/lib/prompts/models";
+import {
+  extractVariablesFromTexts,
+  filledValues,
+  missingVariables,
+  substitute,
+} from "@/lib/prompts/template";
 import type { PromptMessage } from "@/lib/prompts/types";
 import {
   promptDetailQuery,
@@ -40,6 +47,22 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
     })),
   );
   const [error, setError] = useState<string | undefined>();
+  const [variableValues, setVariableValues] = useState<Record<string, string>>(
+    {},
+  );
+  const variableNames = useMemo(
+    () => extractVariablesFromTexts(messages.map((message) => message.content)),
+    [messages],
+  );
+  const missing = missingVariables(variableNames, variableValues);
+  const previewMessages = useMemo(
+    () =>
+      messages.map((message) => ({
+        ...message,
+        content: substitute(message.content, filledValues(variableValues)),
+      })),
+    [messages, variableValues],
+  );
 
   const save = useMutation({
     mutationFn: () =>
@@ -71,7 +94,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
   });
 
   const recordRun = useMutation({
-    mutationFn: () => recordRunRequest(promptId),
+    mutationFn: () => recordRunRequest(promptId, filledValues(variableValues)),
     onSuccess: async () => {
       setError(undefined);
       await queryClient.invalidateQueries({
@@ -201,6 +224,16 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
             {t("prompt.addMessage")}
           </button>
 
+          <PromptVariablesPanel
+            names={variableNames}
+            values={variableValues}
+            missing={missing}
+            previewMessages={previewMessages}
+            onChange={(name, value) =>
+              setVariableValues((current) => ({ ...current, [name]: value }))
+            }
+          />
+
           <label className="flex flex-col gap-2 text-sm">
             {t("prompt.historyNote")}
             <input
@@ -268,6 +301,12 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
                 className="rounded-md border border-[var(--line)] bg-white p-4"
               >
                 <p className="text-sm font-medium">{run.model}</p>
+                <p className="mt-2 text-xs text-[var(--muted)]">
+                  {t("prompt.runInput")}
+                </p>
+                <pre className="prompt-mono mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
+                  {run.input}
+                </pre>
                 <pre className="prompt-mono mt-2 overflow-x-auto text-xs text-[var(--muted)]">
                   {run.output}
                 </pre>
