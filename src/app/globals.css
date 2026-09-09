@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+:root {
+  --ink: #14161c;
+  --panel: #1a1f29;
+  --paper: #f3f5f9;
+  --line: #d5dbe6;
+  --accent: #2c6bed;
+  --muted: #5c6573;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans), sans-serif;
+}
+
+code,
+textarea.prompt-body,
+.prompt-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}

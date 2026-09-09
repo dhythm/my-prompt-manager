@@ -5,16 +5,14 @@ const outputDir = path.join("e2e", "output");
 
 test("home page renders and can be screenshotted", async ({ page }) => {
   await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Prompt Manager" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Prompts" })).toBeVisible();
   await expect(page.getByText("agent@local.test")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Use Developer" }),
   ).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Title" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save prompt" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Create team" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "New prompt" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Logs" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Teams" })).toBeVisible();
 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.screenshot({

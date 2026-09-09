@@ -15,12 +15,25 @@ export type CreatePromptInput = {
   teamId?: string;
 };
 
+export type PromptMessage = {
+  id?: string;
+  role: "system" | "user" | "assistant";
+  content: string;
+  position?: number;
+};
+
 export type PromptVersion = {
   id: string;
   versionNumber: number;
   model: string;
   note: string | null;
   createdAt: string;
+};
+
+export type PromptDetail = {
+  prompt: Prompt;
+  version: PromptVersion;
+  messages: PromptMessage[];
 };
 
 export type PromptRun = {

@@ -1,4 +1,4 @@
-const promptModels = [
+export const promptModels = [
   { id: "gpt-4.1", label: "GPT-4.1" },
   { id: "claude-sonnet-4", label: "Claude Sonnet 4" },
   { id: "grok-4", label: "Grok 4" },

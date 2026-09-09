@@ -22,7 +22,7 @@ Open [http://localhost:3000](http://localhost:3000). With no `DATABASE_URL`, the
 
 Auth defaults to dummy accounts (`agent@local.test` and `dev@local.test`). The Agent user is signed in automatically so local and agent environments work without Clerk. Sign out and visit `/sign-in` to pick the other user. Set `AUTH_DUMMY_AUTO_SIGN_IN=false` to require an explicit sign-in.
 
-Prompts are either personal (only the owner) or owned by a team (all members can view and update). Create a team, invite by email, and transfer a personal prompt into a team. Dummy users can invite each other (`dev@local.test`) without Clerk or SMTP.
+Prompts are either personal (only the owner) or owned by a team (all members can view and update). Each prompt has a model, system/user/assistant messages, a version history, and run logs. Create a team, invite by email, and transfer a personal prompt into a team. Dummy users can invite each other (`dev@local.test`) without Clerk or SMTP.
 
 Clerk is reserved for production later:
 

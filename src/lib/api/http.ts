@@ -38,3 +38,14 @@ export async function postJson<T>(
     body: JSON.stringify(body),
   });
 }
+
+export async function patchJson<T>(
+  input: RequestInfo | URL,
+  body: unknown,
+): Promise<T> {
+  return getJson<T>(input, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}

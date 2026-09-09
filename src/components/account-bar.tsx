@@ -58,7 +58,7 @@ export function AccountBar({
 
 async function switchUser(email: string) {
   await postJson("/api/auth/sign-in", { email });
-  window.location.assign("/");
+  window.location.reload();
 }
 
 async function signOut() {
