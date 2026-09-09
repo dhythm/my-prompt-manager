@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -21,6 +22,6 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    return errorResponse(error, "Failed to load invites");
+    return errorResponse(error, t("error.invitesLoadFailed"));
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -24,6 +25,6 @@ export async function POST(
       prompt: serializePrompt({ ...prompt, teamName: null }),
     });
   } catch (error) {
-    return errorResponse(error, "Failed to transfer prompt");
+    return errorResponse(error, t("error.transferFailed"));
   }
 }

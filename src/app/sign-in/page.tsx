@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { t } from "@/lib/i18n/t";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { listDummyUsers } from "@/server/auth/dummy/users";
 import { resolveAuthConfig } from "@/server/auth/env";
@@ -16,9 +17,9 @@ export default async function SignInPage() {
   if (config.provider !== "dummy") {
     return (
       <main className="mx-auto max-w-lg px-6 py-12">
-        <h1 className="text-2xl font-semibold">Sign in</h1>
+        <h1 className="text-2xl font-semibold">{t("signIn.title")}</h1>
         <p className="mt-4 text-sm text-zinc-600">
-          Dummy accounts are disabled. Configure Clerk to sign in.
+          {t("signIn.clerkDisabled")}
         </p>
       </main>
     );
@@ -28,7 +29,7 @@ export default async function SignInPage() {
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-6 px-6 py-12">
-      <h1 className="text-2xl font-semibold">Sign in</h1>
+      <h1 className="text-2xl font-semibold">{t("signIn.title")}</h1>
       <ul className="flex flex-col gap-3">
         {dummyUsers.map((dummyUser) => (
           <li key={dummyUser.id}>

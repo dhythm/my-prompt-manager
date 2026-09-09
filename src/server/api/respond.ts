@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import {
   isConflictError,
   isForbiddenError,
@@ -22,7 +23,7 @@ export function errorResponse(error: unknown, fallback: string) {
   }
   if (error instanceof SyntaxError) {
     return NextResponse.json(
-      { error: "Request body must be valid JSON" },
+      { error: t("validation.jsonInvalid") },
       { status: 400 },
     );
   }
@@ -31,8 +32,5 @@ export function errorResponse(error: unknown, fallback: string) {
 }
 
 export function unauthorized() {
-  return NextResponse.json(
-    { error: "Authentication required" },
-    { status: 401 },
-  );
+  return NextResponse.json({ error: t("error.authRequired") }, { status: 401 });
 }

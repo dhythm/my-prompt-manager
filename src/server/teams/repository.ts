@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { teamInvites, teamMembers, teams, users } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import {
@@ -25,7 +26,7 @@ export async function createTeam(
     .returning();
 
   if (!team) {
-    throw new Error("Failed to create team");
+    throw new Error(t("error.teamCreateFailed"));
   }
 
   await db.insert(teamMembers).values({
@@ -80,7 +81,7 @@ export async function createInvite(
       )
       .limit(1);
     if (membership) {
-      throw createConflictError("User is already a team member");
+      throw createConflictError(t("error.alreadyMember"));
     }
   }
 
@@ -97,7 +98,7 @@ export async function createInvite(
     .limit(1);
 
   if (pending) {
-    throw createConflictError("Invite already pending");
+    throw createConflictError(t("error.invitePending"));
   }
 
   const [invite] = await db
@@ -113,7 +114,7 @@ export async function createInvite(
     .returning();
 
   if (!invite) {
-    throw new Error("Failed to create invite");
+    throw new Error(t("error.inviteCreateFailed"));
   }
 
   return invite;
@@ -149,7 +150,7 @@ export async function acceptInvite(
     .where(eq(users.id, userId))
     .limit(1);
   if (!user) {
-    throw createNotFoundError("User not found");
+    throw createNotFoundError(t("error.userNotFound"));
   }
 
   const [invite] = await db
@@ -159,15 +160,15 @@ export async function acceptInvite(
     .limit(1);
 
   if (invite?.status !== "pending") {
-    throw createNotFoundError("Invite not found");
+    throw createNotFoundError(t("error.inviteNotFound"));
   }
 
   if (invite.email !== user.email.toLowerCase()) {
-    throw createForbiddenError("Invite is for a different email");
+    throw createForbiddenError(t("error.inviteWrongEmail"));
   }
 
   if (invite.expiresAt.getTime() <= Date.now()) {
-    throw createForbiddenError("Invite has expired");
+    throw createForbiddenError(t("error.inviteExpired"));
   }
 
   await db.insert(teamMembers).values({

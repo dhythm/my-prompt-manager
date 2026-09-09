@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -16,6 +17,6 @@ export async function GET() {
     const runs = await listWorkspaceRuns(db, user.id);
     return NextResponse.json({ runs: runs.map(serializeRun) });
   } catch (error) {
-    return errorResponse(error, "Failed to load runs");
+    return errorResponse(error, t("error.runsLoadFailed"));
   }
 }

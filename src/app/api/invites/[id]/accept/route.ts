@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -19,6 +20,6 @@ export async function POST(
     await acceptInvite(db, user.id, id);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return errorResponse(error, "Failed to accept invite");
+    return errorResponse(error, t("error.inviteAcceptFailed"));
   }
 }

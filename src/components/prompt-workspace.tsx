@@ -7,6 +7,8 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { isHttpError } from "@/lib/api/http";
+import { messageRoleLabel } from "@/lib/i18n/labels";
+import { t } from "@/lib/i18n/t";
 import { promptModels } from "@/lib/prompts/models";
 import type { PromptMessage } from "@/lib/prompts/types";
 import {
@@ -64,7 +66,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       ]);
     },
     onError: (err) => {
-      setError(isHttpError(err) ? err.message : "Failed to save");
+      setError(isHttpError(err) ? err.message : t("prompt.saveFailed"));
     },
   });
 
@@ -77,7 +79,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       });
     },
     onError: (err) => {
-      setError(isHttpError(err) ? err.message : "Failed to record run");
+      setError(isHttpError(err) ? err.message : t("prompt.recordFailed"));
     },
   });
 
@@ -88,29 +90,29 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
           className="min-w-60 flex-1 bg-transparent text-2xl font-semibold tracking-tight outline-none"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          aria-label="Prompt title"
+          aria-label={t("prompt.titleLabel")}
         />
         <p className="text-sm text-[var(--muted)]">
-          Version {data.version.versionNumber}
+          {t("prompt.version", { number: data.version.versionNumber })}
         </p>
       </div>
 
       <div className="flex gap-2">
         <TabButton current={tab} id="editor" onSelect={setTab}>
-          Editor
+          {t("prompt.editor")}
         </TabButton>
         <TabButton current={tab} id="history" onSelect={setTab}>
-          History
+          {t("prompt.history")}
         </TabButton>
         <TabButton current={tab} id="logs" onSelect={setTab}>
-          Logs
+          {t("prompt.logs")}
         </TabButton>
       </div>
 
       {tab === "editor" ? (
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2 text-sm">
-            Model
+            {t("prompt.model")}
             <select
               className="max-w-xs rounded-md border border-[var(--line)] bg-white px-3 py-2"
               value={model}
@@ -132,7 +134,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <label className="text-sm">
-                    Role
+                    {t("prompt.role")}
                     <select
                       className="ml-2 rounded-md border border-[var(--line)] px-2 py-1"
                       value={message.role}
@@ -146,9 +148,11 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
                         );
                       }}
                     >
-                      <option value="system">System</option>
-                      <option value="user">User</option>
-                      <option value="assistant">Assistant</option>
+                      <option value="system">{t("prompt.roleSystem")}</option>
+                      <option value="user">{t("prompt.roleUser")}</option>
+                      <option value="assistant">
+                        {t("prompt.roleAssistant")}
+                      </option>
                     </select>
                   </label>
                   {messages.length > 1 ? (
@@ -161,7 +165,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
                         )
                       }
                     >
-                      Remove
+                      {t("prompt.remove")}
                     </button>
                   ) : null}
                 </div>
@@ -176,7 +180,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
                       ),
                     );
                   }}
-                  aria-label={`${message.role} prompt`}
+                  aria-label={t("prompt.rolePrompt", {
+                    role: messageRoleLabel(message.role),
+                  })}
                 />
               </li>
             ))}
@@ -192,11 +198,11 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               ])
             }
           >
-            Add message
+            {t("prompt.addMessage")}
           </button>
 
           <label className="flex flex-col gap-2 text-sm">
-            History note
+            {t("prompt.historyNote")}
             <input
               className="rounded-md border border-[var(--line)] bg-white px-3 py-2"
               value={note}
@@ -214,7 +220,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               onClick={() => save.mutate()}
               disabled={save.isPending}
             >
-              {save.isPending ? "Saving..." : "Save version"}
+              {save.isPending ? t("prompt.saving") : t("prompt.saveVersion")}
             </button>
             <button
               className="rounded-md border border-[var(--line)] px-4 py-2 text-sm"
@@ -222,7 +228,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               onClick={() => recordRun.mutate()}
               disabled={recordRun.isPending}
             >
-              {recordRun.isPending ? "Recording..." : "Record run"}
+              {recordRun.isPending
+                ? t("prompt.recording")
+                : t("prompt.recordRun")}
             </button>
           </div>
         </div>
@@ -235,7 +243,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               key={version.id}
               className="rounded-md border border-[var(--line)] bg-white p-4"
             >
-              <p className="font-medium">Version {version.versionNumber}</p>
+              <p className="font-medium">
+                {t("prompt.version", { number: version.versionNumber })}
+              </p>
               <p className="text-sm text-[var(--muted)]">{version.model}</p>
               {version.note ? (
                 <p className="mt-1 text-sm">{version.note}</p>
@@ -248,7 +258,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       {tab === "logs" ? (
         <div className="flex flex-col gap-3">
           {runs.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">No runs yet.</p>
+            <p className="text-sm text-[var(--muted)]">
+              {t("prompt.emptyRuns")}
+            </p>
           ) : (
             runs.map((run) => (
               <article

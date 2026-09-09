@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { listDummyUsers } from "@/server/auth/dummy/users";
 import { resolveAuthConfig } from "@/server/auth/env";
 import { getDb } from "@/server/db/client";
@@ -15,7 +16,7 @@ export async function GET() {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to load users" },
+      { error: t("error.usersLoadFailed") },
       { status: 500 },
     );
   }

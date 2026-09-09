@@ -2,6 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PromptWorkspace } from "@/components/prompt-workspace";
+import { t } from "@/lib/i18n/t";
 import {
   promptDetailQuery,
   promptRunsQuery,
@@ -61,7 +62,7 @@ export default async function PromptPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={<p className="p-6 text-sm">Loading...</p>}>
+      <Suspense fallback={<p className="p-6 text-sm">{t("prompt.loading")}</p>}>
         <PromptWorkspace promptId={id} />
       </Suspense>
     </HydrationBoundary>

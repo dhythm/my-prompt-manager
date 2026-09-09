@@ -4,6 +4,7 @@ import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 import { AccountBar } from "@/components/account-bar";
 import { WorkspaceNav } from "@/components/workspace-nav";
+import { t } from "@/lib/i18n/t";
 import { promptsQuery } from "@/lib/queries/prompts";
 import { getQueryClient } from "@/lib/query/get-query-client";
 import { getCurrentUser } from "@/server/auth/current-user";
@@ -27,8 +28,8 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prompt Manager",
-  description: "Manage prompts with PostgreSQL or PGlite",
+  title: t("app.title"),
+  description: t("app.description"),
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -50,7 +51,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   }
 
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="ja" className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-screen bg-[var(--paper)] text-[var(--ink)] antialiased">
         <Providers>
           <AccountBar

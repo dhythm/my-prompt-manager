@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -30,7 +31,7 @@ export async function GET(
       })),
     });
   } catch (error) {
-    return errorResponse(error, "Failed to load prompt");
+    return errorResponse(error, t("error.promptLoadFailed"));
   }
 }
 
@@ -53,6 +54,6 @@ export async function PATCH(
       version: serializeVersion(saved.version),
     });
   } catch (error) {
-    return errorResponse(error, "Failed to save prompt");
+    return errorResponse(error, t("error.promptSaveFailed"));
   }
 }

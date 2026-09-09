@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { t } from "@/lib/i18n/t";
 import { prompts } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createForbiddenError, createNotFoundError } from "@/server/errors";
@@ -12,7 +13,7 @@ export async function findPrompt(db: AppDatabase, promptId: string) {
     .limit(1);
 
   if (!prompt) {
-    throw createNotFoundError("Prompt not found");
+    throw createNotFoundError(t("error.promptNotFound"));
   }
 
   return prompt;
@@ -32,10 +33,10 @@ export async function getReadablePrompt(
       await assertMember(db, userId, prompt.teamId);
       return prompt;
     } catch {
-      throw createNotFoundError("Prompt not found");
+      throw createNotFoundError(t("error.promptNotFound"));
     }
   }
-  throw createNotFoundError("Prompt not found");
+  throw createNotFoundError(t("error.promptNotFound"));
 }
 
 export async function getWritablePrompt(
@@ -51,5 +52,5 @@ export async function getWritablePrompt(
     await assertMember(db, userId, prompt.teamId);
     return prompt;
   }
-  throw createForbiddenError("You cannot update this prompt");
+  throw createForbiddenError(t("error.promptUpdateForbidden"));
 }

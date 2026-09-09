@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { resolveAuthConfig } from "@/server/auth/env";
 
@@ -12,7 +13,7 @@ export async function GET() {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to load the current user" },
+      { error: t("error.currentUserLoadFailed") },
       { status: 500 },
     );
   }

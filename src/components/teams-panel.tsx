@@ -7,6 +7,8 @@ import {
 } from "@tanstack/react-query";
 import { useState } from "react";
 import { isHttpError } from "@/lib/api/http";
+import { teamRoleLabel } from "@/lib/i18n/labels";
+import { t } from "@/lib/i18n/t";
 import { acceptInviteRequest, invitesQuery } from "@/lib/queries/invites";
 import { promptsQuery } from "@/lib/queries/prompts";
 import {
@@ -42,7 +44,7 @@ export function TeamsPanel() {
       await invalidateWorkspace();
     },
     onError: (err) => {
-      setError(isHttpError(err) ? err.message : "Failed to create team");
+      setError(isHttpError(err) ? err.message : t("team.createFailed"));
     },
   });
 
@@ -55,7 +57,7 @@ export function TeamsPanel() {
       await invalidateWorkspace();
     },
     onError: (err) => {
-      setError(isHttpError(err) ? err.message : "Failed to invite");
+      setError(isHttpError(err) ? err.message : t("team.inviteFailed"));
     },
   });
 
@@ -66,21 +68,23 @@ export function TeamsPanel() {
       await invalidateWorkspace();
     },
     onError: (err) => {
-      setError(isHttpError(err) ? err.message : "Failed to accept invite");
+      setError(isHttpError(err) ? err.message : t("team.acceptFailed"));
     },
   });
 
   return (
     <section className="flex flex-col gap-6 rounded-md border border-zinc-200 bg-white p-4">
-      <h2 className="font-medium">Teams</h2>
+      <h2 className="font-medium">{t("team.heading")}</h2>
       <ul className="text-sm">
         {teams.length === 0 ? (
-          <li className="text-zinc-600">No teams yet.</li>
+          <li className="text-zinc-600">{t("team.empty")}</li>
         ) : (
           teams.map((team) => (
             <li key={team.id}>
               {team.name}
-              <span className="ml-2 text-zinc-500">{team.role}</span>
+              <span className="ml-2 text-zinc-500">
+                {teamRoleLabel(team.role)}
+              </span>
             </li>
           ))
         )}
@@ -98,7 +102,7 @@ export function TeamsPanel() {
           name="name"
           value={teamName}
           onChange={(event) => setTeamName(event.target.value)}
-          placeholder="Team name"
+          placeholder={t("team.namePlaceholder")}
           required
         />
         <button
@@ -106,7 +110,7 @@ export function TeamsPanel() {
           type="submit"
           disabled={createTeam.isPending}
         >
-          Create team
+          {t("team.create")}
         </button>
       </form>
 
@@ -139,7 +143,7 @@ export function TeamsPanel() {
             type="email"
             value={inviteEmail}
             onChange={(event) => setInviteEmail(event.target.value)}
-            placeholder="email"
+            placeholder={t("team.emailPlaceholder")}
             required
           />
           <button
@@ -147,7 +151,7 @@ export function TeamsPanel() {
             type="submit"
             disabled={invite.isPending}
           >
-            Invite
+            {t("team.invite")}
           </button>
         </form>
       ) : null}
@@ -163,7 +167,7 @@ export function TeamsPanel() {
                 onClick={() => accept.mutate(item.id)}
                 disabled={accept.isPending}
               >
-                Accept
+                {t("team.accept")}
               </button>
             </li>
           ))}

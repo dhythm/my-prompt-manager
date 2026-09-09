@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { applySessionCookie } from "@/server/auth/cookies";
 import {
   isDummySignInError,
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
     const config = resolveAuthConfig(process.env);
     if (config.provider !== "dummy") {
       return NextResponse.json(
-        { error: "Dummy sign-in is only available when AUTH_PROVIDER=dummy" },
+        { error: t("error.dummySignInOnly") },
         { status: 400 },
       );
     }
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
     const user = await findDummyUserByEmail(db, input.email);
     if (!user) {
       return NextResponse.json(
-        { error: "Unknown dummy user" },
+        { error: t("error.unknownDummyUser") },
         { status: 404 },
       );
     }
@@ -39,7 +40,10 @@ export async function POST(request: Request) {
     }
 
     console.error(error);
-    return NextResponse.json({ error: "Failed to sign in" }, { status: 500 });
+    return NextResponse.json(
+      { error: t("error.signInFailed") },
+      { status: 500 },
+    );
   }
 }
 

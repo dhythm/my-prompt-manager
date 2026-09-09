@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { t } from "@/lib/i18n/t";
 import {
   DUMMY_DEFAULT_USER_ID,
   dummyUsers,
@@ -44,7 +45,7 @@ describe("prompt runs", () => {
 
     await expect(
       listPromptRuns(db, developerId, prompt.id),
-    ).rejects.toThrowError(/not found|cannot/i);
+    ).rejects.toThrowError(t("error.promptNotFound"));
   });
 
   async function openDatabase() {

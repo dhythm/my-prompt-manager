@@ -25,6 +25,30 @@ describe("getJson", () => {
     });
   });
 
+  it("uses the JSON error field from a failed response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: "タイトルは必須です" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }),
+      ),
+    );
+
+    try {
+      await getJson("/api/prompts");
+      throw new Error("expected getJson to throw");
+    } catch (error) {
+      expect(isHttpError(error)).toBe(true);
+      if (isHttpError(error)) {
+        expect(error.status).toBe(400);
+        expect(error.message).toBe("タイトルは必須です");
+      }
+    }
+  });
+
   it("throws an HttpError for a non-2xx response", async () => {
     vi.stubGlobal(
       "fetch",

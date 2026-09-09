@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -16,7 +17,7 @@ export async function GET() {
     const teams = await listTeams(db, user.id);
     return NextResponse.json({ teams });
   } catch (error) {
-    return errorResponse(error, "Failed to load teams");
+    return errorResponse(error, t("error.teamsLoadFailed"));
   }
 }
 
@@ -35,6 +36,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return errorResponse(error, "Failed to create team");
+    return errorResponse(error, t("error.teamCreateFailed"));
   }
 }

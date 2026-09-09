@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { t } from "@/lib/i18n/t";
 import { parseCreatePromptInput } from "./input";
 
 describe("parseCreatePromptInput", () => {
@@ -22,20 +23,22 @@ describe("parseCreatePromptInput", () => {
 
   it("rejects a non-object body", () => {
     expect(() => parseCreatePromptInput("prompt")).toThrowError(
-      /Request body must be a JSON object/,
+      t("validation.jsonObject"),
     );
   });
 
   it("rejects an empty title", () => {
     expect(() =>
       parseCreatePromptInput({ title: "  ", body: "Hello" }),
-    ).toThrowError(/title is required/);
+    ).toThrowError(t("validation.required", { field: t("field.title") }));
   });
 
   it("rejects a title longer than 200 characters", () => {
     expect(() =>
       parseCreatePromptInput({ title: "a".repeat(201), body: "Hello" }),
-    ).toThrowError(/title must be 200 characters or fewer/);
+    ).toThrowError(
+      t("validation.maxLength", { field: t("field.title"), max: 200 }),
+    );
   });
 
   it("allows an empty body", () => {
@@ -48,6 +51,8 @@ describe("parseCreatePromptInput", () => {
   it("rejects a body longer than 10000 characters", () => {
     expect(() =>
       parseCreatePromptInput({ title: "Greeting", body: "a".repeat(10_001) }),
-    ).toThrowError(/body must be 10000 characters or fewer/);
+    ).toThrowError(
+      t("validation.maxLength", { field: t("field.body"), max: 10_000 }),
+    );
   });
 });
