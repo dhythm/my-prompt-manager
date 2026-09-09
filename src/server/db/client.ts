@@ -1,10 +1,11 @@
-import type { PgliteDatabase } from "drizzle-orm/pglite";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { ensureDummyUsers } from "@/server/auth/dummy/users";
+import { resolveAuthConfig } from "@/server/auth/env";
 import { resolveDatabaseConfig } from "./env";
 import { createPgliteDatabase } from "./pglite";
 import { createPostgresDatabase } from "./postgres";
+import type { AppDatabase } from "./types";
 
-export type AppDatabase = PgliteDatabase | PostgresJsDatabase;
+export type { AppDatabase };
 
 const globalForDb = globalThis as typeof globalThis & {
   __promptManagerDb?: Promise<AppDatabase>;
@@ -14,12 +15,16 @@ async function createDatabase(
   env: Record<string, string | undefined> = process.env,
 ): Promise<AppDatabase> {
   const config = resolveDatabaseConfig(env);
+  const db =
+    config.driver === "pglite"
+      ? await createPgliteDatabase(config.dataDir)
+      : createPostgresDatabase(config.url);
 
-  if (config.driver === "pglite") {
-    return createPgliteDatabase(config.dataDir);
+  if (resolveAuthConfig(env).provider === "dummy") {
+    await ensureDummyUsers(db);
   }
 
-  return createPostgresDatabase(config.url);
+  return db;
 }
 
 export function getDb(): Promise<AppDatabase> {

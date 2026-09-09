@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
 import {
   isValidationError,
@@ -23,6 +24,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+
     const json: unknown = await request.json();
     const input = parseCreatePromptInput(json);
     const db = await getDb();

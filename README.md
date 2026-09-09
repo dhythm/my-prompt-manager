@@ -20,6 +20,16 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000). With no `DATABASE_URL`, the app uses PGlite at `.data/pglite` and applies migrations automatically.
 
+Auth defaults to dummy accounts (`agent@local.test` and `dev@local.test`). The Agent user is signed in automatically so local and agent environments work without Clerk. Sign out and visit `/sign-in` to pick the other user. Set `AUTH_DUMMY_AUTO_SIGN_IN=false` to require an explicit sign-in.
+
+Clerk is reserved for production later:
+
+```bash
+AUTH_PROVIDER=clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+```
+
 In-memory PGlite (tests do this by default):
 
 ```bash

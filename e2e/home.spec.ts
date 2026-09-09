@@ -8,6 +8,10 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Prompt Manager" }),
   ).toBeVisible();
+  await expect(page.getByText("agent@local.test")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Use Developer" }),
+  ).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Title" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save prompt" })).toBeVisible();
 
