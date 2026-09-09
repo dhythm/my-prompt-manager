@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { diffLines, formatHunkHeader, splitLines } from "./line-diff";
+import {
+  diffLines,
+  formatHunkHeader,
+  splitLines,
+  toSplitRows,
+} from "./line-diff";
 
 describe("splitLines", () => {
   it("treats empty text as no lines", () => {
@@ -67,6 +72,64 @@ describe("diffLines", () => {
     expect(hunks).toHaveLength(2);
     expect(hunks[0]?.lines.some((line) => line.text === "A")).toBe(true);
     expect(hunks[1]?.lines.some((line) => line.text === "I")).toBe(true);
+  });
+});
+
+describe("toSplitRows", () => {
+  it("pairs a replacement onto one left/right row", () => {
+    const [hunk] = diffLines("hello", "world");
+
+    expect(toSplitRows(hunk?.lines ?? [])).toEqual([
+      {
+        left: { type: "remove", text: "hello", number: 1 },
+        right: { type: "add", text: "world", number: 1 },
+      },
+    ]);
+  });
+
+  it("keeps context on both sides", () => {
+    const [hunk] = diffLines("keep\nold\ntail", "keep\nnew\ntail");
+
+    expect(toSplitRows(hunk?.lines ?? [])).toEqual([
+      {
+        left: { type: "context", text: "keep", number: 1 },
+        right: { type: "context", text: "keep", number: 1 },
+      },
+      {
+        left: { type: "remove", text: "old", number: 2 },
+        right: { type: "add", text: "new", number: 2 },
+      },
+      {
+        left: { type: "context", text: "tail", number: 3 },
+        right: { type: "context", text: "tail", number: 3 },
+      },
+    ]);
+  });
+
+  it("leaves the opposite side empty for addition-only lines", () => {
+    const [hunk] = diffLines("", "hello");
+
+    expect(toSplitRows(hunk?.lines ?? [])).toEqual([
+      {
+        left: { type: "empty", text: "", number: null },
+        right: { type: "add", text: "hello", number: 1 },
+      },
+    ]);
+  });
+
+  it("leaves the opposite side empty for deletion-only lines", () => {
+    const [hunk] = diffLines("keep\ngone", "keep");
+
+    expect(toSplitRows(hunk?.lines ?? [])).toEqual([
+      {
+        left: { type: "context", text: "keep", number: 1 },
+        right: { type: "context", text: "keep", number: 1 },
+      },
+      {
+        left: { type: "remove", text: "gone", number: 2 },
+        right: { type: "empty", text: "", number: null },
+      },
+    ]);
   });
 });
 

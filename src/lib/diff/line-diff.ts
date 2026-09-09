@@ -15,6 +15,19 @@ export type DiffHunk = {
   lines: DiffLine[];
 };
 
+type SplitCellType = "context" | "add" | "remove" | "empty";
+
+export type SplitCell = {
+  type: SplitCellType;
+  text: string;
+  number: number | null;
+};
+
+export type SplitRow = {
+  left: SplitCell;
+  right: SplitCell;
+};
+
 const CONTEXT = 3;
 
 export function splitLines(text: string): string[] {
@@ -26,6 +39,62 @@ export function splitLines(text: string): string[] {
 
 export function formatHunkHeader(hunk: DiffHunk): string {
   return `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`;
+}
+
+export function toSplitRows(lines: DiffLine[]): SplitRow[] {
+  const rows: SplitRow[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    if (line === undefined) {
+      break;
+    }
+
+    if (line.type === "context") {
+      rows.push({
+        left: { type: "context", text: line.text, number: line.oldNumber },
+        right: { type: "context", text: line.text, number: line.newNumber },
+      });
+      index += 1;
+      continue;
+    }
+
+    const removes: DiffLine[] = [];
+    const adds: DiffLine[] = [];
+    while (index < lines.length && lines[index]?.type === "remove") {
+      const current = lines[index];
+      if (current === undefined) {
+        break;
+      }
+      removes.push(current);
+      index += 1;
+    }
+    while (index < lines.length && lines[index]?.type === "add") {
+      const current = lines[index];
+      if (current === undefined) {
+        break;
+      }
+      adds.push(current);
+      index += 1;
+    }
+
+    const count = Math.max(removes.length, adds.length);
+    for (let pair = 0; pair < count; pair += 1) {
+      const remove = removes[pair];
+      const add = adds[pair];
+      rows.push({
+        left: remove
+          ? { type: "remove", text: remove.text, number: remove.oldNumber }
+          : { type: "empty", text: "", number: null },
+        right: add
+          ? { type: "add", text: add.text, number: add.newNumber }
+          : { type: "empty", text: "", number: null },
+      });
+    }
+  }
+
+  return rows;
 }
 
 export function diffLines(oldText: string, newText: string): DiffHunk[] {

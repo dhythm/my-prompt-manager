@@ -78,6 +78,7 @@ test("compares versions with a colored line diff", async ({ page }) => {
   await page.getByRole("button", { name: "バージョンを保存" }).click();
   await expect(page.getByText("バージョン 3")).toBeVisible();
 
+  await page.setViewportSize({ width: 1400, height: 900 });
   await page.getByRole("button", { name: "履歴" }).click();
   await expect(
     page.getByRole("button", { name: "バージョン 3" }),
@@ -106,6 +107,16 @@ test("compares versions with a colored line diff", async ({ page }) => {
   ).toBeVisible();
   await expect(
     added.filter({ hasText: "Sure — here is a calmer draft." }),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-diff-side="left"][data-diff-type="remove"]', {
+      hasText: "You are a helpful writing coach.",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-diff-side="right"][data-diff-type="add"]', {
+      hasText: "You are a strict writing coach.",
+    }),
   ).toBeVisible();
   await expect(page.getByText("追加", { exact: true })).toBeVisible();
 
