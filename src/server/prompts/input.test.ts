@@ -38,10 +38,11 @@ describe("parseCreatePromptInput", () => {
     ).toThrowError(/title must be 200 characters or fewer/);
   });
 
-  it("rejects an empty body", () => {
-    expect(() =>
-      parseCreatePromptInput({ title: "Greeting", body: "" }),
-    ).toThrowError(/body is required/);
+  it("allows an empty body", () => {
+    expect(parseCreatePromptInput({ title: "Greeting", body: "" })).toEqual({
+      title: "Greeting",
+      body: "",
+    });
   });
 
   it("rejects a body longer than 10000 characters", () => {

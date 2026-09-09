@@ -19,3 +19,11 @@ export async function createPromptRequest(input: CreatePromptInput) {
   const data = await postJson<{ prompt: Prompt }>("/api/prompts", input);
   return data.prompt;
 }
+
+export async function transferPromptRequest(promptId: string, teamId: string) {
+  const data = await postJson<{ prompt: Prompt }>(
+    `/api/prompts/${promptId}/transfer`,
+    { teamId },
+  );
+  return data.prompt;
+}

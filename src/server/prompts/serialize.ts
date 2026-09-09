@@ -1,14 +1,59 @@
-import type { Prompt } from "@/lib/prompts/types";
-import type { prompts } from "@/server/db/schema";
+import type { Prompt, PromptRun, PromptVersion } from "@/lib/prompts/types";
 
-type PromptRecord = typeof prompts.$inferSelect;
-
-export function serializePrompt(prompt: PromptRecord): Prompt {
+export function serializePrompt(prompt: {
+  id: string;
+  title: string;
+  body: string;
+  ownerUserId: string | null;
+  teamId: string | null;
+  teamName?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): Prompt {
   return {
     id: prompt.id,
     title: prompt.title,
     body: prompt.body,
+    ownerUserId: prompt.ownerUserId,
+    teamId: prompt.teamId,
+    teamName: prompt.teamName ?? null,
     createdAt: prompt.createdAt.toISOString(),
     updatedAt: prompt.updatedAt.toISOString(),
+  };
+}
+
+export function serializeVersion(version: {
+  id: string;
+  versionNumber: number;
+  model: string;
+  note: string | null;
+  createdAt: Date;
+}): PromptVersion {
+  return {
+    id: version.id,
+    versionNumber: version.versionNumber,
+    model: version.model,
+    note: version.note,
+    createdAt: version.createdAt.toISOString(),
+  };
+}
+
+export function serializeRun(run: {
+  id: string;
+  promptId: string;
+  model: string;
+  input: string;
+  output: string;
+  status: string;
+  createdAt: Date;
+}): PromptRun {
+  return {
+    id: run.id,
+    promptId: run.promptId,
+    model: run.model,
+    input: run.input,
+    output: run.output,
+    status: run.status,
+    createdAt: run.createdAt.toISOString(),
   };
 }

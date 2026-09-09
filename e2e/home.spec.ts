@@ -14,6 +14,7 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Title" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save prompt" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create team" })).toBeVisible();
 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.screenshot({

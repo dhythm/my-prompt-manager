@@ -1,3 +1,6 @@
+"use client";
+
+import { postJson } from "@/lib/api/http";
 import type { SessionUser } from "@/lib/auth/types";
 
 export function AccountBar({
@@ -22,29 +25,27 @@ export function AccountBar({
             ? dummyUsers
                 .filter((dummyUser) => dummyUser.id !== user.id)
                 .map((dummyUser) => (
-                  <form
+                  <button
                     key={dummyUser.id}
-                    action="/api/auth/sign-in"
-                    method="post"
+                    className="rounded-md border border-zinc-300 px-3 py-1"
+                    type="button"
+                    onClick={() => {
+                      void switchUser(dummyUser.email);
+                    }}
                   >
-                    <input type="hidden" name="email" value={dummyUser.email} />
-                    <button
-                      className="rounded-md border border-zinc-300 px-3 py-1"
-                      type="submit"
-                    >
-                      Use {dummyUser.name}
-                    </button>
-                  </form>
+                    Use {dummyUser.name}
+                  </button>
                 ))
             : null}
-          <form action="/api/auth/sign-out" method="post">
-            <button
-              className="rounded-md border border-zinc-300 px-3 py-1"
-              type="submit"
-            >
-              Sign out
-            </button>
-          </form>
+          <button
+            className="rounded-md border border-zinc-300 px-3 py-1"
+            type="button"
+            onClick={() => {
+              void signOut();
+            }}
+          >
+            Sign out
+          </button>
         </div>
       ) : (
         <a className="text-sm underline" href="/sign-in">
@@ -53,4 +54,14 @@ export function AccountBar({
       )}
     </header>
   );
+}
+
+async function switchUser(email: string) {
+  await postJson("/api/auth/sign-in", { email });
+  window.location.assign("/");
+}
+
+async function signOut() {
+  await postJson("/api/auth/sign-out", {});
+  window.location.assign("/sign-in");
 }

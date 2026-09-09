@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
-import { parseCreatePromptInput } from "@/server/prompts/input";
-import { createPrompt, listPrompts } from "@/server/prompts/repository";
-import { serializePrompt } from "@/server/prompts/serialize";
+import { parseCreateTeamInput } from "@/server/teams/input";
+import { createTeam, listTeams } from "@/server/teams/repository";
 
 export async function GET() {
   try {
@@ -14,10 +13,10 @@ export async function GET() {
     }
 
     const db = await getDb();
-    const prompts = await listPrompts(db, user.id);
-    return NextResponse.json({ prompts: prompts.map(serializePrompt) });
+    const teams = await listTeams(db, user.id);
+    return NextResponse.json({ teams });
   } catch (error) {
-    return errorResponse(error, "Failed to load prompts");
+    return errorResponse(error, "Failed to load teams");
   }
 }
 
@@ -28,14 +27,14 @@ export async function POST(request: Request) {
       return unauthorized();
     }
 
-    const input = parseCreatePromptInput(await request.json());
+    const input = parseCreateTeamInput(await request.json());
     const db = await getDb();
-    const prompt = await createPrompt(db, user.id, input);
+    const team = await createTeam(db, user.id, input);
     return NextResponse.json(
-      { prompt: serializePrompt({ ...prompt, teamName: null }) },
+      { team: { id: team.id, name: team.name, role: "owner" } },
       { status: 201 },
     );
   } catch (error) {
-    return errorResponse(error, "Failed to create prompt");
+    return errorResponse(error, "Failed to create team");
   }
 }
