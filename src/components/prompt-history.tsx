@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PromptDiffView, VersionMessages } from "@/components/prompt-diff-view";
 import {
+  type CompareRange,
   compareRangeForVersion,
   defaultCompareRange,
   diffPromptVersions,
@@ -22,11 +23,11 @@ export function PromptHistory({
   onLoadIntoEditor: (detail: PromptVersionDetail) => void;
 }) {
   const versionNumbers = versions.map((version) => version.versionNumber);
-  const initial = defaultCompareRange(versions);
-  const [toVersion, setToVersion] = useState(initial?.to ?? 1);
-  const [fromVersion, setFromVersion] = useState<number | null>(
-    initial?.from ?? null,
-  );
+  const defaultRange = defaultCompareRange(versions);
+  const [override, setOverride] = useState<CompareRange | null>(null);
+  const range = override ?? defaultRange ?? { from: null, to: 1 };
+  const fromVersion = range.from;
+  const toVersion = range.to;
 
   const fromQuery = useQuery({
     ...promptVersionDetailQuery.options(promptId, fromVersion ?? 0),
@@ -42,9 +43,7 @@ export function PromptHistory({
       : null;
 
   function selectVersion(versionNumber: number) {
-    const range = compareRangeForVersion(versionNumber, versionNumbers);
-    setToVersion(range.to);
-    setFromVersion(range.from);
+    setOverride(compareRangeForVersion(versionNumber, versionNumbers));
   }
 
   return (
@@ -57,7 +56,10 @@ export function PromptHistory({
             value={fromVersion ?? ""}
             onChange={(event) => {
               const value = event.target.value;
-              setFromVersion(value === "" ? null : Number(value));
+              setOverride({
+                from: value === "" ? null : Number(value),
+                to: toVersion,
+              });
             }}
           >
             <option value="">{t("prompt.noPreviousVersion")}</option>
