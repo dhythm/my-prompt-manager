@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { t } from "@/lib/i18n/t";
-import { parseCreatePromptInput } from "./input";
+import { parseCreatePromptInput, parseRecordRunInput } from "./input";
 
 describe("parseCreatePromptInput", () => {
   it("accepts a valid payload", () => {
@@ -53,6 +53,39 @@ describe("parseCreatePromptInput", () => {
       parseCreatePromptInput({ title: "Greeting", body: "a".repeat(10_001) }),
     ).toThrowError(
       t("validation.maxLength", { field: t("field.body"), max: 10_000 }),
+    );
+  });
+});
+
+describe("parseRecordRunInput", () => {
+  it("defaults to an empty variable map", () => {
+    expect(parseRecordRunInput({})).toEqual({ variables: {} });
+    expect(parseRecordRunInput(undefined)).toEqual({ variables: {} });
+  });
+
+  it("accepts string variable values", () => {
+    expect(
+      parseRecordRunInput({ variables: { name: "Ada", topic: "math" } }),
+    ).toEqual({
+      variables: { name: "Ada", topic: "math" },
+    });
+  });
+
+  it("rejects a non-object variables map", () => {
+    expect(() => parseRecordRunInput({ variables: "Ada" })).toThrowError(
+      t("validation.variablesObject"),
+    );
+  });
+
+  it("rejects an invalid variable name", () => {
+    expect(() =>
+      parseRecordRunInput({ variables: { "foo-bar": "Ada" } }),
+    ).toThrowError(t("validation.variableNameInvalid", { name: "foo-bar" }));
+  });
+
+  it("rejects a non-string variable value", () => {
+    expect(() => parseRecordRunInput({ variables: { name: 1 } })).toThrowError(
+      t("validation.variableValueMustBeString", { name: "name" }),
     );
   });
 });

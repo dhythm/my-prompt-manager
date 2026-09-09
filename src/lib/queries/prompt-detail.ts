@@ -71,10 +71,12 @@ export async function savePromptRequest(
   return patchJson(`/api/prompts/${id}`, input);
 }
 
-export async function recordRunRequest(id: string) {
-  const data = await postJson<{ run: PromptRun }>(
-    `/api/prompts/${id}/runs`,
-    {},
-  );
+export async function recordRunRequest(
+  id: string,
+  variables: Record<string, string> = {},
+) {
+  const data = await postJson<{ run: PromptRun }>(`/api/prompts/${id}/runs`, {
+    variables,
+  });
   return data.run;
 }

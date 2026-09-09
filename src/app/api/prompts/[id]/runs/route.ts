@@ -3,6 +3,7 @@ import { t } from "@/lib/i18n/t";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
+import { parseRecordRunInput } from "@/server/prompts/input";
 import { createPromptRun, listPromptRuns } from "@/server/prompts/runs";
 import { serializeRun } from "@/server/prompts/serialize";
 
@@ -26,7 +27,7 @@ export async function GET(
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: RouteContext<"/api/prompts/[id]/runs">,
 ) {
   try {
@@ -36,8 +37,9 @@ export async function POST(
     }
 
     const { id } = await context.params;
+    const { variables } = parseRecordRunInput(await request.json());
     const db = await getDb();
-    const run = await createPromptRun(db, user.id, id);
+    const run = await createPromptRun(db, user.id, id, variables);
     return NextResponse.json({ run: serializeRun(run) }, { status: 201 });
   } catch (error) {
     return errorResponse(error, t("error.runRecordFailed"));

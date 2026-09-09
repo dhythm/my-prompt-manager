@@ -1,5 +1,6 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
+import { substitute } from "@/lib/prompts/template";
 import { promptRuns } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { getReadablePrompt } from "./access";
@@ -10,10 +11,13 @@ export async function createPromptRun(
   db: AppDatabase,
   userId: string,
   promptId: string,
+  variables: Record<string, string> = {},
 ) {
   const detail = await getPromptDetail(db, userId, promptId);
   const input = detail.messages
-    .map((message) => `${message.role}: ${message.content}`)
+    .map(
+      (message) => `${message.role}: ${substitute(message.content, variables)}`,
+    )
     .join("\n\n");
   const output = t("prompt.recordedRun", {
     model: detail.version.model,

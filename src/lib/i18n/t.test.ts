@@ -18,4 +18,10 @@ describe("t", () => {
       "タイトルは必須です",
     );
   });
+
+  it("formats the missing-variables list", () => {
+    expect(t("prompt.missingVariables", { names: "name、topic" })).toBe(
+      "未入力: name、topic",
+    );
+  });
 });
