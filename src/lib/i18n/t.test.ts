@@ -11,6 +11,7 @@ describe("t", () => {
       "Developerに切り替え",
     );
     expect(t("prompt.version", { number: 2 })).toBe("バージョン 2");
+    expect(t("prompt.messageIndex", { number: 1 })).toBe("メッセージ 1");
   });
 
   it("keeps unknown placeholders intact", () => {

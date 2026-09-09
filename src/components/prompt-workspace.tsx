@@ -6,6 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { PromptHistory } from "@/components/prompt-history";
 import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
@@ -17,7 +18,7 @@ import {
   missingVariables,
   substitute,
 } from "@/lib/prompts/template";
-import type { PromptMessage } from "@/lib/prompts/types";
+import type { PromptMessage, PromptVersionDetail } from "@/lib/prompts/types";
 import {
   promptDetailQuery,
   promptRunsQuery,
@@ -92,6 +93,17 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       setError(isHttpError(err) ? err.message : t("prompt.saveFailed"));
     },
   });
+
+  function loadVersion(detail: PromptVersionDetail) {
+    setModel(detail.version.model);
+    setMessages(
+      detail.messages.map((message) => ({
+        ...message,
+        id: message.id ?? crypto.randomUUID(),
+      })),
+    );
+    setTab("editor");
+  }
 
   const recordRun = useMutation({
     mutationFn: () => recordRunRequest(promptId, filledValues(variableValues)),
@@ -270,22 +282,11 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       ) : null}
 
       {tab === "history" ? (
-        <ol className="flex flex-col gap-3">
-          {versions.map((version) => (
-            <li
-              key={version.id}
-              className="rounded-md border border-[var(--line)] bg-white p-4"
-            >
-              <p className="font-medium">
-                {t("prompt.version", { number: version.versionNumber })}
-              </p>
-              <p className="text-sm text-[var(--muted)]">{version.model}</p>
-              {version.note ? (
-                <p className="mt-1 text-sm">{version.note}</p>
-              ) : null}
-            </li>
-          ))}
-        </ol>
+        <PromptHistory
+          promptId={promptId}
+          versions={versions}
+          onLoadIntoEditor={loadVersion}
+        />
       ) : null}
 
       {tab === "logs" ? (

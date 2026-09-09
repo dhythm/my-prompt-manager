@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
 import { defaultPromptModel } from "@/lib/prompts/models";
 import { promptMessages, prompts, promptVersions } from "@/server/db/schema";
@@ -91,6 +91,37 @@ export async function listPromptVersions(
     .from(promptVersions)
     .where(eq(promptVersions.promptId, promptId))
     .orderBy(desc(promptVersions.versionNumber));
+}
+
+export async function getPromptVersion(
+  db: AppDatabase,
+  userId: string,
+  promptId: string,
+  versionNumber: number,
+) {
+  await getReadablePrompt(db, userId, promptId);
+  const [version] = await db
+    .select()
+    .from(promptVersions)
+    .where(
+      and(
+        eq(promptVersions.promptId, promptId),
+        eq(promptVersions.versionNumber, versionNumber),
+      ),
+    )
+    .limit(1);
+
+  if (!version) {
+    throw createNotFoundError(t("error.promptVersionNotFound"));
+  }
+
+  const messages = await db
+    .select()
+    .from(promptMessages)
+    .where(eq(promptMessages.versionId, version.id))
+    .orderBy(promptMessages.position);
+
+  return { version, messages };
 }
 
 async function latestVersionNumber(db: AppDatabase, promptId: string) {

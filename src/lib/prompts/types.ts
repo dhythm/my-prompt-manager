@@ -36,6 +36,11 @@ export type PromptDetail = {
   messages: PromptMessage[];
 };
 
+export type PromptVersionDetail = {
+  version: PromptVersion;
+  messages: PromptMessage[];
+};
+
 export type PromptRun = {
   id: string;
   promptId: string;

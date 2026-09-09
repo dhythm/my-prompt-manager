@@ -4,7 +4,11 @@ import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
 import { parseSavePromptInput } from "@/server/prompts/input";
-import { serializePrompt, serializeVersion } from "@/server/prompts/serialize";
+import {
+  serializeMessage,
+  serializePrompt,
+  serializeVersion,
+} from "@/server/prompts/serialize";
 import { getPromptDetail, savePromptVersion } from "@/server/prompts/versions";
 
 export async function GET(
@@ -23,12 +27,7 @@ export async function GET(
     return NextResponse.json({
       prompt: serializePrompt({ ...detail.prompt, teamName: null }),
       version: serializeVersion(detail.version),
-      messages: detail.messages.map((message) => ({
-        id: message.id,
-        role: message.role as "system" | "user" | "assistant",
-        content: message.content,
-        position: message.position,
-      })),
+      messages: detail.messages.map(serializeMessage),
     });
   } catch (error) {
     return errorResponse(error, t("error.promptLoadFailed"));

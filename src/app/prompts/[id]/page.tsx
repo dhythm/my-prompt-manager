@@ -14,6 +14,7 @@ import { getDb } from "@/server/db/client";
 import { isNotFoundError } from "@/server/errors";
 import { listPromptRuns } from "@/server/prompts/runs";
 import {
+  serializeMessage,
   serializePrompt,
   serializeRun,
   serializeVersion,
@@ -39,12 +40,7 @@ export default async function PromptPage({
     queryClient.setQueryData(promptDetailQuery.key(id), {
       prompt: serializePrompt({ ...detail.prompt, teamName: null }),
       version: serializeVersion(detail.version),
-      messages: detail.messages.map((message) => ({
-        id: message.id,
-        role: message.role as "system" | "user" | "assistant",
-        content: message.content,
-        position: message.position,
-      })),
+      messages: detail.messages.map(serializeMessage),
     });
     const versions = await listPromptVersions(db, user.id, id);
     queryClient.setQueryData(
