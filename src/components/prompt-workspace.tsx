@@ -12,6 +12,7 @@ import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
 import { t } from "@/lib/i18n/t";
+import { writeCurrentProjectId } from "@/lib/projects/current";
 import { promptModels } from "@/lib/prompts/models";
 import {
   extractVariablesFromTexts,
@@ -132,6 +133,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
     mutationFn: () => copyPromptRequest(promptId, targetProjectId),
     onSuccess: async (prompt) => {
       setError(undefined);
+      if (prompt.projectId) {
+        writeCurrentProjectId(prompt.projectId);
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: promptsQuery.key }),
         queryClient.invalidateQueries({ queryKey: projectsQuery.key }),

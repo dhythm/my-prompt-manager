@@ -36,8 +36,8 @@ export function ProjectsPanel() {
   const createProject = useMutation({
     mutationFn: createProjectRequest,
     onSuccess: async () => {
-      setName("");
       setError(undefined);
+      setName("");
       await invalidateWorkspace();
     },
     onError: (err) => {

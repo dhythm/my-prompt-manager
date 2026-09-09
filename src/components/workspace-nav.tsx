@@ -9,10 +9,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { t } from "@/lib/i18n/t";
+import {
+  readCurrentProjectId,
+  subscribeCurrentProjectId,
+  writeCurrentProjectId,
+} from "@/lib/projects/current";
 import { projectsQuery } from "@/lib/queries/projects";
 import { createPromptRequest, promptsQuery } from "@/lib/queries/prompts";
-
-const CURRENT_PROJECT_KEY = "currentProjectId";
 
 export function WorkspaceNav() {
   const pathname = usePathname();
@@ -23,13 +26,18 @@ export function WorkspaceNav() {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(CURRENT_PROJECT_KEY);
-    const match = projects.find((project) => project.id === stored);
-    const next = match?.id ?? projects[0]?.id ?? "";
-    setProjectId(next);
-    if (next) {
-      sessionStorage.setItem(CURRENT_PROJECT_KEY, next);
+    function syncProjectId() {
+      const stored = readCurrentProjectId();
+      const match = projects.find((project) => project.id === stored);
+      const next = match?.id ?? projects[0]?.id ?? "";
+      setProjectId(next);
+      if (next && next !== stored) {
+        writeCurrentProjectId(next);
+      }
     }
+
+    syncProjectId();
+    return subscribeCurrentProjectId(syncProjectId);
   }, [projects]);
 
   const visiblePrompts = projectId
@@ -76,7 +84,7 @@ export function WorkspaceNav() {
             onChange={(event) => {
               const next = event.target.value;
               setProjectId(next);
-              sessionStorage.setItem(CURRENT_PROJECT_KEY, next);
+              writeCurrentProjectId(next);
             }}
           >
             {projects.map((project) => (
