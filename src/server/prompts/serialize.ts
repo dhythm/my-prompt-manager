@@ -12,6 +12,8 @@ export function serializePrompt(prompt: {
   ownerUserId: string | null;
   teamId: string | null;
   teamName?: string | null;
+  projectId?: string | null;
+  projectName?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): Prompt {
@@ -22,6 +24,8 @@ export function serializePrompt(prompt: {
     ownerUserId: prompt.ownerUserId,
     teamId: prompt.teamId,
     teamName: prompt.teamName ?? null,
+    projectId: prompt.projectId ?? null,
+    projectName: prompt.projectName ?? null,
     createdAt: prompt.createdAt.toISOString(),
     updatedAt: prompt.updatedAt.toISOString(),
   };

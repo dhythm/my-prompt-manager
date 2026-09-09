@@ -5,12 +5,14 @@ import { Suspense } from "react";
 import { AccountBar } from "@/components/account-bar";
 import { WorkspaceNav } from "@/components/workspace-nav";
 import { t } from "@/lib/i18n/t";
+import { projectsQuery } from "@/lib/queries/projects";
 import { promptsQuery } from "@/lib/queries/prompts";
 import { getQueryClient } from "@/lib/query/get-query-client";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { listDummyUsers } from "@/server/auth/dummy/users";
 import { resolveAuthConfig } from "@/server/auth/env";
 import { getDb } from "@/server/db/client";
+import { listProjects } from "@/server/projects/repository";
 import { listPrompts } from "@/server/prompts/repository";
 import { serializePrompt } from "@/server/prompts/serialize";
 import { Providers } from "./providers";
@@ -41,13 +43,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   if (user) {
     const db = await getDb();
-    await queryClient.prefetchQuery({
-      ...promptsQuery.options(),
-      queryFn: async () => {
-        const records = await listPrompts(db, user.id);
-        return records.map(serializePrompt);
-      },
-    });
+    await Promise.all([
+      queryClient.prefetchQuery({
+        ...promptsQuery.options(),
+        queryFn: async () => {
+          const records = await listPrompts(db, user.id);
+          return records.map(serializePrompt);
+        },
+      }),
+      queryClient.prefetchQuery({
+        ...projectsQuery.options(),
+        queryFn: () => listProjects(db, user.id),
+      }),
+    ]);
   }
 
   return (

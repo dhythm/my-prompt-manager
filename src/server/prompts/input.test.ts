@@ -48,6 +48,20 @@ describe("parseCreatePromptInput", () => {
     });
   });
 
+  it("accepts an optional project id", () => {
+    expect(
+      parseCreatePromptInput({
+        title: "Greeting",
+        body: "Hello",
+        projectId: " project-1 ",
+      }),
+    ).toEqual({
+      title: "Greeting",
+      body: "Hello",
+      projectId: "project-1",
+    });
+  });
+
   it("rejects a body longer than 10000 characters", () => {
     expect(() =>
       parseCreatePromptInput({ title: "Greeting", body: "a".repeat(10_001) }),

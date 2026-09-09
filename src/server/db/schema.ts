@@ -75,6 +75,32 @@ export const teamInvites = pgTable("team_invites", {
     .notNull(),
 });
 
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    name: text().notNull(),
+    ownerUserId: uuid("owner_user_id").references(() => users.id),
+    teamId: uuid("team_id").references(() => teams.id),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "project_owner_xor",
+      sql`(
+        (${table.ownerUserId} is not null and ${table.teamId} is null)
+        or (${table.ownerUserId} is null and ${table.teamId} is not null)
+      )`,
+    ),
+  ],
+);
+
 export const prompts = pgTable(
   "prompts",
   {
@@ -83,6 +109,7 @@ export const prompts = pgTable(
     body: text().notNull(),
     ownerUserId: uuid("owner_user_id").references(() => users.id),
     teamId: uuid("team_id").references(() => teams.id),
+    projectId: uuid("project_id").references(() => projects.id),
     createdByUserId: uuid("created_by_user_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

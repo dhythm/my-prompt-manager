@@ -89,6 +89,7 @@ describe("prompts repository", () => {
     const transferred = await transferPrompt(db, agentId, created.id, team.id);
     expect(transferred.ownerUserId).toBeNull();
     expect(transferred.teamId).toBe(team.id);
+    expect(transferred.projectId).toBeTruthy();
 
     const invite = await createInvite(db, agentId, team.id, {
       email: "dev@local.test",
