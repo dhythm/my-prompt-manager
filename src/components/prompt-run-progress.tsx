@@ -22,7 +22,6 @@ export function RunBusyButton({
       disabled={pending}
       aria-busy={pending}
     >
-      {pending ? <RunSpinner /> : null}
       {pending ? t("prompt.recording") : t("prompt.recordRun")}
     </button>
   );

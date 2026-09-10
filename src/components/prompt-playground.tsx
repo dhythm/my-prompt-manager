@@ -95,7 +95,9 @@ export function PromptPlayground({
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <RunBusyButton pending={run.isPending} onClick={() => run.mutate()} />
       <RunBusyStatus pending={run.isPending} />
-      {run.isPending ? null : result ? <PromptRunCard run={result} /> : null}
+      {run.isPending ? null : result ? (
+        <PromptRunCard run={result} showInput={false} />
+      ) : null}
     </div>
   );
 }

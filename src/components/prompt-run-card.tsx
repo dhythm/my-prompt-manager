@@ -41,10 +41,12 @@ export function PromptRunCard({
   run,
   heading,
   action,
+  showInput = true,
 }: {
   run: PromptRun;
   heading?: string;
   action?: ReactNode;
+  showInput?: boolean;
 }) {
   const model = promptModelLabel(run.model);
 
@@ -52,20 +54,26 @@ export function PromptRunCard({
     <article className="rounded-md border border-[var(--line)] bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-medium">{heading ?? model}</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          {showInput || heading ? (
+            <p className="font-medium">{heading ?? model}</p>
+          ) : null}
+          <p
+            className={`text-sm text-[var(--muted)] ${showInput || heading ? "mt-1" : ""}`}
+          >
             {runMeta(
               run,
-              heading ? model : undefined,
+              showInput && !heading ? model : undefined,
               formatRunAt(run.createdAt),
             )}
           </p>
         </div>
         {action}
       </div>
-      <pre className="prompt-mono mt-3 overflow-x-auto whitespace-pre-wrap text-xs">
-        {run.input}
-      </pre>
+      {showInput ? (
+        <pre className="prompt-mono mt-3 overflow-x-auto whitespace-pre-wrap text-xs">
+          {run.input}
+        </pre>
+      ) : null}
       <section className="mt-3" aria-label={t("prompt.runOutput")}>
         <pre className="prompt-mono overflow-x-auto whitespace-pre-wrap text-xs">
           {run.output}
