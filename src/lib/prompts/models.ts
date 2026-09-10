@@ -50,6 +50,15 @@ export type PromptModelId = (typeof promptModels)[number]["id"];
 
 export const defaultPromptModel: PromptModelId = "grok-4.6";
 
+export function promptModelForId(id: string): PromptModelId {
+  let hash = 0;
+  for (let index = 0; index < id.length; index += 1) {
+    hash = (hash + id.charCodeAt(index) * (index + 1)) % 2_147_483_647;
+  }
+  const model = promptModels[hash % promptModels.length];
+  return model?.id ?? defaultPromptModel;
+}
+
 const legacyModels: PromptModel[] = [
   { id: "gpt-4.1", label: "GPT-4.1", provider: "openai", apiModel: "gpt-4.1" },
   {

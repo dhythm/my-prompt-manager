@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { promptModelForId } from "@/lib/prompts/models";
 import {
   DUMMY_DEFAULT_USER_ID,
   dummyUsers,
@@ -40,7 +41,9 @@ describe("prompts repository", () => {
 
     const agentPrompts = await listPrompts(db, agentId);
     expect(agentPrompts).toHaveLength(1);
-    expect(agentPrompts[0]?.model).toBe("grok-4.6");
+    expect(agentPrompts[0]?.model).toBe(
+      promptModelForId(agentPrompts[0]?.id ?? ""),
+    );
     await expect(listPrompts(db, developerId)).resolves.toEqual([]);
   });
 
@@ -116,6 +119,8 @@ describe("prompts repository", () => {
     });
 
     const listed = await listPrompts(db, agentId);
+    expect(listed).toHaveLength(1);
+    expect(listed[0]?.id).toBe(prompt.id);
     expect(listed[0]?.model).toBe("gpt-5.6");
   });
 

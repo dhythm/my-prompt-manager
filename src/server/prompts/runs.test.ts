@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { t } from "@/lib/i18n/t";
+import { estimateCostUsd, promptModelForId } from "@/lib/prompts/models";
 import {
   DUMMY_DEFAULT_USER_ID,
   dummyUsers,
@@ -46,19 +47,21 @@ describe("prompt runs", () => {
     const run = await createPromptRun(db, agentId, prompt.id, {
       completeChat: stubCompleteChat,
     });
+    const model = promptModelForId(prompt.id);
     expect(run.status).toBe("succeeded");
-    expect(run.output).toBe("reply:grok-4.6");
+    expect(run.output).toBe(`reply:${model}`);
     expect(run.inputTokens).toBe(12);
     expect(run.outputTokens).toBe(34);
-    expect(run.costUsd).toBe("0.0002280000");
+    expect(run.costUsd).toBe(estimateCostUsd(model, 12, 34));
 
     const logs = await listPromptRuns(db, agentId, prompt.id);
-    expect(logs).toHaveLength(1);
-    expect(logs[0]?.id).toBe(run.id);
-    expect(logs[0]?.promptTitle).toBe("Greeting");
+    expect(logs.runs).toHaveLength(1);
+    expect(logs.runs[0]?.id).toBe(run.id);
+    expect(logs.runs[0]?.promptTitle).toBe("Greeting");
+    expect(logs.nextCursor).toBeNull();
 
     const workspace = await listWorkspaceRuns(db, agentId);
-    expect(workspace).toEqual(
+    expect(workspace.runs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           id: run.id,
@@ -158,7 +161,7 @@ describe("prompt runs", () => {
     expect(run.status).toBe("failed");
     expect(run.output).toBe(t("error.llmRequestFailed"));
     expect(run.costUsd).toBeNull();
-    expect(await listPromptRuns(db, agentId, prompt.id)).toHaveLength(1);
+    expect((await listPromptRuns(db, agentId, prompt.id)).runs).toHaveLength(1);
   });
 
   it("does not insert a run when the provider key is missing", async () => {
@@ -178,7 +181,7 @@ describe("prompt runs", () => {
       }),
     ).rejects.toThrowError(t("error.llmKeyMissing", { name: "XAI_API_KEY" }));
 
-    expect(await listPromptRuns(db, agentId, prompt.id)).toHaveLength(0);
+    expect((await listPromptRuns(db, agentId, prompt.id)).runs).toHaveLength(0);
   });
 
   it("loads a run the user can access and hides others", async () => {
@@ -194,11 +197,60 @@ describe("prompt runs", () => {
     await expect(getPromptRun(db, agentId, run.id)).resolves.toMatchObject({
       id: run.id,
       promptTitle: "Greeting",
-      output: "reply:grok-4.6",
+      output: `reply:${promptModelForId(prompt.id)}`,
     });
     await expect(getPromptRun(db, developerId, run.id)).rejects.toThrowError(
       t("error.promptNotFound"),
     );
+  });
+
+  it("pages workspace runs and filters by prompt and model", async () => {
+    const db = await openDatabase();
+    const greeting = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+    const other = await createPrompt(db, agentId, {
+      title: "Other",
+      body: "Something else",
+    });
+
+    const first = await createPromptRun(db, agentId, greeting.id, {
+      model: "grok-4.6",
+      completeChat: stubCompleteChat,
+    });
+    const second = await createPromptRun(db, agentId, greeting.id, {
+      model: "gpt-5.6",
+      completeChat: stubCompleteChat,
+    });
+    const third = await createPromptRun(db, agentId, other.id, {
+      model: "grok-4.6",
+      completeChat: stubCompleteChat,
+    });
+
+    const page = await listWorkspaceRuns(db, agentId, { limit: 2 });
+    expect(page.runs).toHaveLength(2);
+    expect(page.nextCursor).toEqual(expect.any(String));
+
+    const next = await listWorkspaceRuns(db, agentId, {
+      limit: 2,
+      cursor: page.nextCursor ?? undefined,
+    });
+    expect(next.runs).toHaveLength(1);
+    expect(next.nextCursor).toBeNull();
+    const pagedIds = [...page.runs, ...next.runs].map((run) => run.id);
+    expect(pagedIds).toHaveLength(3);
+    expect(new Set(pagedIds)).toEqual(
+      new Set([first.id, second.id, third.id]),
+    );
+
+    const byPrompt = await listWorkspaceRuns(db, agentId, {
+      promptId: greeting.id,
+    });
+    expect(byPrompt.runs.map((run) => run.id)).toEqual([second.id, first.id]);
+
+    const byModel = await listWorkspaceRuns(db, agentId, { model: "gpt-5.6" });
+    expect(byModel.runs.map((run) => run.id)).toEqual([second.id]);
   });
 
   async function openDatabase() {

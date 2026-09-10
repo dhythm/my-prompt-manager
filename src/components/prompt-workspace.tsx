@@ -3,6 +3,7 @@
 import {
   useMutation,
   useQueryClient,
+  useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -43,7 +44,8 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
   const { data: versions } = useSuspenseQuery(
     promptVersionsQuery.options(promptId),
   );
-  const { data: runs } = useSuspenseQuery(promptRunsQuery.options(promptId));
+  const runsQuery = useSuspenseInfiniteQuery(promptRunsQuery.options(promptId));
+  const runs = runsQuery.data.pages.flatMap((page) => page.runs);
   const { data: projects } = useSuspenseQuery(projectsQuery.options());
   const [tab, setTab] = useState<Tab>("editor");
   const [title, setTitle] = useState(data.prompt.title);
@@ -372,13 +374,27 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
               {t("prompt.emptyRuns")}
             </p>
           ) : (
-            runs.map((run) => (
-              <PromptRunSummary
-                key={run.id}
-                run={run}
-                href={`/runs/${run.id}`}
-              />
-            ))
+            <>
+              {runs.map((run) => (
+                <PromptRunSummary
+                  key={run.id}
+                  run={run}
+                  href={`/runs/${run.id}`}
+                />
+              ))}
+              {runsQuery.hasNextPage ? (
+                <button
+                  className="self-start rounded-md border border-[var(--line)] px-3 py-2 text-sm"
+                  type="button"
+                  onClick={() => runsQuery.fetchNextPage()}
+                  disabled={runsQuery.isFetchingNextPage}
+                >
+                  {runsQuery.isFetchingNextPage
+                    ? t("runs.loadingMore")
+                    : t("runs.loadMore")}
+                </button>
+              ) : null}
+            </>
           )}
         </div>
       ) : null}

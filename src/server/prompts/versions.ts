@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
-import { defaultPromptModel } from "@/lib/prompts/models";
+import { promptModelForId } from "@/lib/prompts/models";
 import { promptMessages, prompts, promptVersions } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createNotFoundError } from "@/server/errors";
@@ -21,7 +21,7 @@ export async function createInitialPromptVersion(
     promptId,
     userId,
     versionNumber: 1,
-    model: defaultPromptModel,
+    model: promptModelForId(promptId),
     note: t("prompt.createdNote"),
     title: input.title,
     messages: defaultMessages(input.body),

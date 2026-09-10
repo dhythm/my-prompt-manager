@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { t } from "@/lib/i18n/t";
-import { parseCreatePromptInput, parseRecordRunInput } from "./input";
+import {
+  parseCreatePromptInput,
+  parseListRunsQuery,
+  parseRecordRunInput,
+} from "./input";
 
 describe("parseCreatePromptInput", () => {
   it("accepts a valid payload", () => {
@@ -116,6 +120,32 @@ describe("parseRecordRunInput", () => {
     ).toEqual({
       variables: { name: "Ada" },
       model: "grok-4.6",
+    });
+  });
+});
+
+describe("parseListRunsQuery", () => {
+  it("defaults to an empty filter and the standard page size", () => {
+    expect(parseListRunsQuery(new URLSearchParams())).toEqual({
+      limit: 20,
+    });
+  });
+
+  it("reads prompt, model, cursor, and limit", () => {
+    expect(
+      parseListRunsQuery(
+        new URLSearchParams({
+          promptId: "11111111-1111-4111-8111-111111111111",
+          model: "gpt-5.6",
+          cursor: "2026-01-02T03:04:05.000Z::22222222-2222-4222-8222-222222222222",
+          limit: "10",
+        }),
+      ),
+    ).toEqual({
+      promptId: "11111111-1111-4111-8111-111111111111",
+      model: "gpt-5.6",
+      cursor: "2026-01-02T03:04:05.000Z::22222222-2222-4222-8222-222222222222",
+      limit: 10,
     });
   });
 });

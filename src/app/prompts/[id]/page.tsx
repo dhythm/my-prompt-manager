@@ -52,7 +52,15 @@ export default async function PromptPage({
       versions.map(serializeVersion),
     );
     const runs = await listPromptRuns(db, user.id, id);
-    queryClient.setQueryData(promptRunsQuery.key(id), runs.map(serializeRun));
+    queryClient.setQueryData(promptRunsQuery.key(id), {
+      pages: [
+        {
+          runs: runs.runs.map(serializeRun),
+          nextCursor: runs.nextCursor,
+        },
+      ],
+      pageParams: [null],
+    });
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();

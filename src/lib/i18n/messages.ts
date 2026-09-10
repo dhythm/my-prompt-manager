@@ -77,6 +77,9 @@ export const messages = {
     backToList: "ログ",
     empty: "実行ログはまだありません",
     loading: "読み込み中...",
+    filterAll: "すべて",
+    loadMore: "もっと見る",
+    loadingMore: "読み込み中...",
   },
   team: {
     title: "チーム",
@@ -123,6 +126,8 @@ export const messages = {
     email: "メールアドレス",
     teamId: "チーム",
     projectId: "プロジェクト",
+    promptId: "プロンプト",
+    cursor: "続き",
   },
   validation: {
     jsonObject: "リクエスト本文はJSONオブジェクトである必要があります",
@@ -140,6 +145,7 @@ export const messages = {
     variableNameInvalid: "変数名 {name} が不正です",
     variableValueMustBeString: "変数 {name} の値は文字列である必要があります",
     variableValueMax: "変数 {name} の値は{max}文字以内にしてください",
+    cursorInvalid: "続きの指定が不正です",
   },
   error: {
     responseJson: "応答が正しいJSONではありません",

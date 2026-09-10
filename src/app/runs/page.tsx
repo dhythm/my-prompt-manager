@@ -1,6 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { t } from "@/lib/i18n/t";
 import { workspaceRunsQuery } from "@/lib/queries/prompt-detail";
 import { getQueryClient } from "@/lib/query/get-query-client";
@@ -20,8 +19,16 @@ export default async function RunsPage() {
 
   const db = await getDb();
   const queryClient = getQueryClient();
-  const runs = await listWorkspaceRuns(db, user.id);
-  queryClient.setQueryData(workspaceRunsQuery.key, runs.map(serializeRun));
+  const page = await listWorkspaceRuns(db, user.id);
+  queryClient.setQueryData(workspaceRunsQuery.pageKey({}), {
+    pages: [
+      {
+        runs: page.runs.map(serializeRun),
+        nextCursor: page.nextCursor,
+      },
+    ],
+    pageParams: [null],
+  });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -29,9 +36,7 @@ export default async function RunsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">
           {t("runs.title")}
         </h1>
-        <Suspense fallback={<p className="text-sm">{t("runs.loading")}</p>}>
-          <RunsList />
-        </Suspense>
+        <RunsList />
       </main>
     </HydrationBoundary>
   );

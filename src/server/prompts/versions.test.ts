@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { promptModelForId } from "@/lib/prompts/models";
 import {
   DUMMY_DEFAULT_USER_ID,
   ensureDummyUsers,
@@ -30,7 +31,7 @@ describe("prompt versions", () => {
 
     const detail = await getPromptDetail(db, agentId, prompt.id);
     expect(detail.version.versionNumber).toBe(1);
-    expect(detail.version.model).toBe("grok-4.6");
+    expect(detail.version.model).toBe(promptModelForId(prompt.id));
     expect(detail.messages.map((message) => message.role)).toEqual([
       "system",
       "user",

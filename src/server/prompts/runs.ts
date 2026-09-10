@@ -1,6 +1,7 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
 import { estimateCostUsd } from "@/lib/prompts/models";
+import { RUNS_PAGE_SIZE } from "@/lib/prompts/runs-page";
 import { substitute } from "@/lib/prompts/template";
 import { promptRuns, prompts } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
@@ -20,6 +21,32 @@ export type CreatePromptRunInput = {
   variables?: Record<string, string>;
   model?: string;
   completeChat?: CompleteChat;
+};
+
+export type ListRunsQuery = {
+  promptId?: string;
+  model?: string;
+  cursor?: string;
+  limit?: number;
+};
+
+export type ListedRuns = {
+  runs: Array<{
+    id: string;
+    promptId: string;
+    promptTitle: string;
+    versionId: string;
+    model: string;
+    input: string;
+    output: string;
+    status: string;
+    inputTokens: number | null;
+    outputTokens: number | null;
+    costUsd: string | null;
+    createdByUserId: string | null;
+    createdAt: Date;
+  }>;
+  nextCursor: string | null;
 };
 
 const runColumns = {
@@ -130,27 +157,90 @@ export async function listPromptRuns(
   db: AppDatabase,
   userId: string,
   promptId: string,
-) {
+  query: ListRunsQuery = {},
+): Promise<ListedRuns> {
   await getReadablePrompt(db, userId, promptId);
-  return db
-    .select(runColumns)
-    .from(promptRuns)
-    .innerJoin(prompts, eq(prompts.id, promptRuns.promptId))
-    .where(eq(promptRuns.promptId, promptId))
-    .orderBy(desc(promptRuns.createdAt));
+  return listRunPage(db, {
+    promptIds: [promptId],
+    model: query.model,
+    cursor: query.cursor,
+    limit: query.limit,
+  });
 }
 
-export async function listWorkspaceRuns(db: AppDatabase, userId: string) {
+export async function listWorkspaceRuns(
+  db: AppDatabase,
+  userId: string,
+  query: ListRunsQuery = {},
+): Promise<ListedRuns> {
   const visible = await listPrompts(db, userId);
-  const ids = visible.map((prompt) => prompt.id);
+  const ids = visible
+    .map((prompt) => prompt.id)
+    .filter((id) => (query.promptId ? id === query.promptId : true));
   if (ids.length === 0) {
-    return [];
+    return { runs: [], nextCursor: null };
   }
 
-  return db
+  return listRunPage(db, {
+    promptIds: ids,
+    model: query.model,
+    cursor: query.cursor,
+    limit: query.limit,
+  });
+}
+
+async function listRunPage(
+  db: AppDatabase,
+  query: {
+    promptIds: string[];
+    model?: string;
+    cursor?: string;
+    limit?: number;
+  },
+): Promise<ListedRuns> {
+  const limit = query.limit ?? RUNS_PAGE_SIZE;
+  const conditions = [inArray(promptRuns.promptId, query.promptIds)];
+  if (query.model) {
+    conditions.push(eq(promptRuns.model, query.model));
+  }
+  const cursor = query.cursor ? decodeRunCursor(query.cursor) : undefined;
+  if (cursor) {
+    const older = or(
+      lt(promptRuns.createdAt, cursor.createdAt),
+      and(
+        eq(promptRuns.createdAt, cursor.createdAt),
+        lt(promptRuns.id, cursor.id),
+      ),
+    );
+    if (older) {
+      conditions.push(older);
+    }
+  }
+
+  const rows = await db
     .select(runColumns)
     .from(promptRuns)
     .innerJoin(prompts, eq(prompts.id, promptRuns.promptId))
-    .where(inArray(promptRuns.promptId, ids))
-    .orderBy(desc(promptRuns.createdAt));
+    .where(and(...conditions))
+    .orderBy(desc(promptRuns.createdAt), desc(promptRuns.id))
+    .limit(limit + 1);
+
+  const hasMore = rows.length > limit;
+  const runs = hasMore ? rows.slice(0, limit) : rows;
+  const last = runs[runs.length - 1];
+  return {
+    runs,
+    nextCursor: hasMore && last ? encodeRunCursor(last) : null,
+  };
+}
+
+function encodeRunCursor(run: { createdAt: Date; id: string }): string {
+  return `${run.createdAt.toISOString()}::${run.id}`;
+}
+
+function decodeRunCursor(value: string): { createdAt: Date; id: string } {
+  const separator = value.lastIndexOf("::");
+  const createdAt = new Date(value.slice(0, separator));
+  const id = value.slice(separator + 2);
+  return { createdAt, id };
 }

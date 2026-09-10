@@ -1,5 +1,6 @@
 import { createNamedError, isNamedError } from "@/lib/errors";
 import { type TranslationKey, t } from "@/lib/i18n/t";
+import { RUNS_PAGE_SIZE, RUNS_PAGE_SIZE_MAX } from "@/lib/prompts/runs-page";
 import type { CreatePromptInput } from "@/lib/prompts/types";
 
 export type { CreatePromptInput };
@@ -72,6 +73,51 @@ function parseVariables(value: unknown): Record<string, string> {
     variables[name] = raw;
   }
   return variables;
+}
+
+const RUN_CURSOR = /^(\d{4}-\d{2}-\d{2}T[\d:.]+Z)::([0-9a-f-]{36})$/i;
+
+export function parseListRunsQuery(search: URLSearchParams): {
+  promptId?: string;
+  model?: string;
+  cursor?: string;
+  limit: number;
+} {
+  const promptId = parseOptionalId(search.get("promptId"), "field.promptId");
+  const modelRaw = search.get("model");
+  const model =
+    modelRaw === null || modelRaw.trim() === ""
+      ? undefined
+      : parseRequiredText(modelRaw, "field.model", 80);
+  const cursorRaw = search.get("cursor");
+  const cursor =
+    cursorRaw === null || cursorRaw.trim() === ""
+      ? undefined
+      : parseRunCursor(cursorRaw);
+  return {
+    ...(promptId ? { promptId } : {}),
+    ...(model ? { model } : {}),
+    ...(cursor ? { cursor } : {}),
+    limit: parseLimit(search.get("limit")),
+  };
+}
+
+function parseRunCursor(value: string): string {
+  if (!RUN_CURSOR.test(value)) {
+    throw createValidationError(t("validation.cursorInvalid"));
+  }
+  return value;
+}
+
+function parseLimit(value: string | null): number {
+  if (value === null || value.trim() === "") {
+    return RUNS_PAGE_SIZE;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw createValidationError(t("validation.cursorInvalid"));
+  }
+  return Math.min(parsed, RUNS_PAGE_SIZE_MAX);
 }
 
 export function parseSavePromptInput(value: unknown): {

@@ -93,10 +93,8 @@ describe("copyPromptToProject", () => {
       sourceDetail.messages.map((message) => message.id),
     );
 
-    await expect(listPromptRuns(db, agentId, copied.id)).resolves.toEqual([]);
-    await expect(listPromptRuns(db, agentId, source.id)).resolves.toHaveLength(
-      1,
-    );
+    expect((await listPromptRuns(db, agentId, copied.id)).runs).toEqual([]);
+    expect((await listPromptRuns(db, agentId, source.id)).runs).toHaveLength(1);
 
     const listed = await listPrompts(db, agentId, production.id);
     expect(listed.map((prompt) => prompt.id)).toEqual([copied.id]);

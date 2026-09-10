@@ -15,6 +15,7 @@ test("fills variables, previews expansion, and records expanded run input", asyn
 
   await page.getByLabel("プロンプト名").fill("Variable greeting");
   await page.getByLabel("ユーザープロンプト").fill("Hello {{name}}");
+  await page.getByLabel("モデル").selectOption({ label: "Grok 4.6" });
 
   await expect(page.getByRole("heading", { name: "変数" })).toBeVisible();
   await expect(page.getByText("未入力: name")).toBeVisible();

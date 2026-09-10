@@ -3,6 +3,7 @@ import {
   promptVersionDetailQuery,
   promptVersionsQuery,
   runDetailQuery,
+  workspaceRunsQuery,
 } from "./prompt-detail";
 
 describe("prompt version queries", () => {
@@ -26,5 +27,12 @@ describe("prompt version queries", () => {
 
   it("keys run detail by run id", () => {
     expect(runDetailQuery.key("run-1")).toEqual(["run", "run-1"]);
+  });
+
+  it("keys workspace runs by prompt and model filters", () => {
+    expect(workspaceRunsQuery.pageKey()).toEqual(["runs", "", ""]);
+    expect(
+      workspaceRunsQuery.pageKey({ promptId: "p1", model: "grok-4.6" }),
+    ).toEqual(["runs", "p1", "grok-4.6"]);
   });
 });

@@ -12,6 +12,7 @@ test("creates a prompt with system and user messages", async ({ page }) => {
 
   await page.getByLabel("プロンプト名").fill("Greeting");
   await page.getByLabel("ユーザープロンプト").fill("Say hello");
+  await page.getByLabel("モデル").selectOption({ label: "Grok 4.6" });
   await page.getByRole("button", { name: "バージョンを保存" }).click();
   await expect(page.getByText("バージョン 2")).toBeVisible();
 
@@ -21,11 +22,11 @@ test("creates a prompt with system and user messages", async ({ page }) => {
   await page.getByRole("button", { name: "編集" }).click();
   await page.getByRole("button", { name: "実行" }).click();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
-  await expect(page.getByText("Grok 4.6")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Grok 4.6/ }).first()).toBeVisible();
   await expect(page.getByText("$0.000228")).toBeVisible();
   await expect(page.getByText("12 → 34")).toBeVisible();
   await expect(page.getByText(/Say hello/)).toHaveCount(0);
-  await page.getByRole("link", { name: /Grok 4.6/ }).click();
+  await page.getByRole("link", { name: /Grok 4.6/ }).first().click();
   await expect(page.getByLabel("出力")).toHaveText("stub-output");
   await expect(page.getByText(/Say hello/)).toBeVisible();
 });
