@@ -109,11 +109,17 @@ describe("filledValues", () => {
 });
 
 describe("dummyVariableValues", () => {
-  it("fills each name with a sample value", () => {
+  it("fills unknown names with a sample value", () => {
     expect(dummyVariableValues(["name", "topic"])).toEqual({
       name: "sample-name",
       topic: "sample-topic",
     });
+  });
+
+  it("fills catalog names with realistic examples", () => {
+    expect(dummyVariableValues(["audience", "draft"]).audience).toContain(
+      "Northwind",
+    );
   });
 });
 

@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { SidebarSelect } from "@/components/sidebar-select";
 import { t } from "@/lib/i18n/t";
 import {
   readCurrentProjectId,
@@ -47,30 +48,24 @@ export function WorkspaceNav() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col gap-6 overflow-hidden bg-[var(--panel)] px-4 py-5 text-sm text-zinc-200">
-      {workspaces.length > 0 ? (
-        <label className="flex flex-col gap-1 text-xs text-zinc-400">
-          {t("nav.workspace")}
-          <select
-            className="rounded-md border border-white/10 bg-white/5 px-2 py-2 text-sm text-zinc-100"
-            value={workspace ?? ""}
-            aria-label={t("nav.workspace")}
-            onChange={(event) => {
-              const next = resolveCurrentProjectId(
-                projectsInWorkspace(projects, event.target.value),
-                readCurrentProjectId(),
-              );
-              if (next) {
-                selectProjectId(next);
-              }
-            }}
-          >
-            {workspaces.map((item) => (
-              <option key={item.key} value={item.key}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      {workspaces.length > 1 ? (
+        <SidebarSelect
+          label={t("nav.workspace")}
+          value={workspace ?? ""}
+          options={workspaces.map((item) => ({
+            value: item.key,
+            label: item.label,
+          }))}
+          onChange={(nextWorkspace) => {
+            const next = resolveCurrentProjectId(
+              projectsInWorkspace(projects, nextWorkspace),
+              readCurrentProjectId(),
+            );
+            if (next) {
+              selectProjectId(next);
+            }
+          }}
+        />
       ) : null}
 
       <nav className="flex flex-col gap-1">
@@ -88,24 +83,16 @@ export function WorkspaceNav() {
         </SideLink>
       </nav>
 
-      {workspaceProjects.length > 0 ? (
-        <label className="flex flex-col gap-1 text-xs text-zinc-400">
-          {t("project.switcher")}
-          <select
-            className="rounded-md border border-white/10 bg-white/5 px-2 py-2 text-sm text-zinc-100"
-            value={projectId}
-            aria-label={t("project.switcher")}
-            onChange={(event) => {
-              selectProjectId(event.target.value);
-            }}
-          >
-            {workspaceProjects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </label>
+      {workspaceProjects.length > 1 ? (
+        <SidebarSelect
+          label={t("project.switcher")}
+          value={projectId}
+          options={workspaceProjects.map((project) => ({
+            value: project.id,
+            label: project.name,
+          }))}
+          onChange={selectProjectId}
+        />
       ) : null}
 
       <button

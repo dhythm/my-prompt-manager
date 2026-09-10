@@ -1,5 +1,6 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
+import { chooseLabeledOption } from "./choose-option";
 
 const outputDir = path.join("e2e", "output");
 
@@ -7,6 +8,13 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: "プロンプト", level: 1 }),
+  ).toBeVisible();
+  const workspace = page.getByRole("combobox", { name: "ワークスペース" });
+  if ((await workspace.count()) > 0) {
+    await chooseLabeledOption(page, "ワークスペース", "個人");
+  }
+  await expect(
+    page.getByRole("link", { name: "気まずいメールを整える" }),
   ).toBeVisible();
   await expect(
     page.getByText("ライブラリから選ぶか、新規作成してください。"),
@@ -142,12 +150,13 @@ test("keeps the home heading while switching projects", async ({ page }) => {
     page.getByRole("main").getByRole("button", { name: "新規作成" }),
   ).toBeVisible();
 
-  const switcher = page.getByLabel("プロジェクト");
-  const current = await switcher.inputValue();
-  const labels = await switcher.locator("option").allTextContents();
-  const next = labels.find((label) => label !== current);
-  if (next) {
-    await switcher.selectOption({ label: next });
+  const switcher = page.getByRole("combobox", { name: "プロジェクト" });
+  if ((await switcher.count()) > 0) {
+    await switcher.click();
+    const options = page.getByRole("option");
+    if ((await options.count()) > 1) {
+      await options.nth(1).click();
+    }
   }
 
   await expect(heading).toBeVisible();

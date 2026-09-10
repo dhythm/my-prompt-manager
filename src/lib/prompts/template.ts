@@ -56,8 +56,30 @@ export function filledValues(
   );
 }
 
+const playgroundExampleValues: Record<string, string> = {
+  audience: "the hardware buyer at Northwind who has been waiting since Friday",
+  constraint:
+    "120 words max. Do not apologize for the delay. Offer Tuesday 10:00 JST.",
+  draft:
+    "This is unacceptable. You promised Friday and we still have nothing. Fix it today.",
+  language: "TypeScript",
+  intent:
+    "Reject empty IDs in the public API without breaking existing clients",
+  diff: 'export function parseId(raw: string | null) {\n  return raw ?? "unknown";\n}',
+  meeting: "Weekly launch standup",
+  notes:
+    "Ada: pricing page slips to Thursday. Sam will draft copy. We did not decide on the banner.",
+  product: "Shared prompt library",
+  spec: "Users can star a prompt. Starred prompts appear first. Guests can star too.",
+};
+
 export function dummyVariableValues(names: string[]): Record<string, string> {
-  return Object.fromEntries(names.map((name) => [name, `sample-${name}`]));
+  return Object.fromEntries(
+    names.map((name) => [
+      name,
+      playgroundExampleValues[name] ?? `sample-${name}`,
+    ]),
+  );
 }
 
 export function withDummyVariableValues(

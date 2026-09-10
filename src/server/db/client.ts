@@ -1,6 +1,10 @@
-import { ensureDummyUsers } from "@/server/auth/dummy/users";
+import {
+  DUMMY_DEFAULT_USER_ID,
+  ensureDummyUsers,
+} from "@/server/auth/dummy/users";
 import { resolveAuthConfig } from "@/server/auth/env";
 import { backfillPromptOwnership } from "@/server/prompts/backfill";
+import { ensureSamplePrompts } from "@/server/prompts/seed-samples";
 import { resolveDatabaseConfig } from "./env";
 import { createPgliteDatabase } from "./pglite";
 import { createPostgresDatabase } from "./postgres";
@@ -24,6 +28,7 @@ async function createDatabase(
   if (resolveAuthConfig(env).provider === "dummy") {
     await ensureDummyUsers(db);
     await backfillPromptOwnership(db);
+    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
   }
 
   return db;

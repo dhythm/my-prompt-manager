@@ -1,5 +1,6 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { chooseLabeledOption } from "./choose-option";
 
 const outputDir = path.join("e2e", "output");
 
@@ -23,8 +24,8 @@ test("creates a project and copies a prompt with version history", async ({
     fullPage: true,
   });
 
-  await page.getByLabel("ワークスペース").selectOption({ label: "個人" });
-  await page.getByLabel("プロジェクト").selectOption({ label: development });
+  await chooseWorkspace(page, "個人");
+  await chooseLabeledOption(page, "プロジェクト", development);
   await page
     .getByRole("complementary")
     .getByRole("button", { name: "新規作成" })
@@ -64,17 +65,25 @@ test("creates a project and copies a prompt with version history", async ({
   });
 
   await page.getByRole("link", { name: "プロンプト", exact: true }).click();
-  await page.getByLabel("ワークスペース").selectOption({ label: "個人" });
-  await page.getByLabel("プロジェクト").selectOption({ label: production });
+  await chooseWorkspace(page, "個人");
+  await chooseLabeledOption(page, "プロジェクト", production);
   await expect(
     page.getByRole("main").getByRole("link", { name: /Greeting/ }),
   ).toBeVisible();
 
-  await page.getByLabel("プロジェクト").selectOption({ label: development });
+  await chooseLabeledOption(page, "プロジェクト", development);
   await expect(
     page.getByRole("main").getByRole("link", { name: /Greeting/ }),
   ).toHaveCount(1);
 });
+
+async function chooseWorkspace(page: Page, label: string) {
+  if (
+    (await page.getByRole("combobox", { name: "ワークスペース" }).count()) > 0
+  ) {
+    await chooseLabeledOption(page, "ワークスペース", label);
+  }
+}
 
 async function createProject(page: Page, name: string) {
   const nameField = page.getByPlaceholder("プロジェクト名");
