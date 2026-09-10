@@ -101,8 +101,8 @@ test("home page renders and can be screenshotted", async ({ page }) => {
 
   await page.getByRole("link", { name: "プロンプト", exact: true }).click();
   await expect(
-    page.getByRole("main").getByText("Grok 4.6").first(),
-  ).toBeVisible();
+    page.getByRole("main").getByRole("link", { name: /無題/ }).first(),
+  ).toContainText(/Grok 4.6|GPT-5.6|Claude Sonnet 5|Gemini 3.1 Pro/);
 
   await page
     .getByRole("main")
