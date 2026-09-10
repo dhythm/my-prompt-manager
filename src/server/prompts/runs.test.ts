@@ -240,9 +240,7 @@ describe("prompt runs", () => {
     expect(next.nextCursor).toBeNull();
     const pagedIds = [...page.runs, ...next.runs].map((run) => run.id);
     expect(pagedIds).toHaveLength(3);
-    expect(new Set(pagedIds)).toEqual(
-      new Set([first.id, second.id, third.id]),
-    );
+    expect(new Set(pagedIds)).toEqual(new Set([first.id, second.id, third.id]));
 
     const byPrompt = await listWorkspaceRuns(db, agentId, {
       promptId: greeting.id,

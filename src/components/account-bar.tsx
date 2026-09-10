@@ -28,8 +28,7 @@ export function AccountBar({
             aria-haspopup="menu"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {user.name}{" "}
-            <span className="text-zinc-500">{user.email}</span>
+            {user.name} <span className="text-zinc-500">{user.email}</span>
           </button>
           {menuOpen ? (
             <div
