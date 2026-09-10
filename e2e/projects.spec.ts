@@ -23,6 +23,7 @@ test("creates a project and copies a prompt with version history", async ({
     fullPage: true,
   });
 
+  await page.getByLabel("ワークスペース").selectOption({ label: "個人" });
   await page.getByLabel("プロジェクト").selectOption({ label: development });
   await page
     .getByRole("complementary")
@@ -62,6 +63,7 @@ test("creates a project and copies a prompt with version history", async ({
     fullPage: true,
   });
 
+  await page.getByLabel("ワークスペース").selectOption({ label: "個人" });
   await page.getByLabel("プロジェクト").selectOption({ label: production });
   await expect(page.getByRole("link", { name: /Greeting/ })).toBeVisible();
 

@@ -20,9 +20,12 @@ test("invites a dummy user to a team", async ({ page }) => {
   await teamRow.getByRole("button", { name: "招待" }).click();
   expect((await inviteResponse).ok()).toBeTruthy();
 
-  await page.getByRole("button", { name: "Developerに切り替え" }).click();
+  await page.getByRole("button", { name: /agent@local.test/ }).click();
+  await page.getByRole("menuitem", { name: "Developerに切り替え" }).click();
+  await expect(page.getByText("dev@local.test")).toBeVisible();
+  await page.getByRole("button", { name: /dev@local.test/ }).click();
   await expect(
-    page.getByRole("button", { name: "Agentに切り替え" }),
+    page.getByRole("menuitem", { name: "Agentに切り替え" }),
   ).toBeVisible();
 
   const inviteRow = page.getByRole("listitem").filter({ hasText: teamName });

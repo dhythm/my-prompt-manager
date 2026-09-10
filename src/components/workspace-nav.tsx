@@ -8,7 +8,16 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { t } from "@/lib/i18n/t";
+import {
+  readCurrentProjectId,
+  resolveCurrentProjectId,
+} from "@/lib/projects/current";
 import { useCurrentProjectId } from "@/lib/projects/use-current-project-id";
+import {
+  listWorkspaces,
+  projectsInWorkspace,
+  workspaceKey,
+} from "@/lib/projects/workspace";
 import { projectsQuery } from "@/lib/queries/projects";
 import { createPromptRequest, promptsQuery } from "@/lib/queries/prompts";
 
@@ -19,6 +28,14 @@ export function WorkspaceNav() {
   const { data: prompts } = useSuspenseQuery(promptsQuery.options());
   const { data: projects } = useSuspenseQuery(projectsQuery.options());
   const { projectId, selectProjectId } = useCurrentProjectId(projects);
+  const currentProject = projects.find((project) => project.id === projectId);
+  const workspace = currentProject
+    ? workspaceKey(currentProject)
+    : listWorkspaces(projects, t("nav.personal"))[0]?.key;
+  const workspaces = listWorkspaces(projects, t("nav.personal"));
+  const workspaceProjects = workspace
+    ? projectsInWorkspace(projects, workspace)
+    : projects;
 
   const visiblePrompts = projectId
     ? prompts.filter((prompt) => prompt.projectId === projectId)
@@ -39,6 +56,32 @@ export function WorkspaceNav() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col gap-6 overflow-hidden bg-[var(--panel)] px-4 py-5 text-sm text-zinc-200">
+      {workspaces.length > 0 ? (
+        <label className="flex flex-col gap-1 text-xs text-zinc-400">
+          {t("nav.workspace")}
+          <select
+            className="rounded-md border border-white/10 bg-white/5 px-2 py-2 text-sm text-zinc-100"
+            value={workspace ?? ""}
+            aria-label={t("nav.workspace")}
+            onChange={(event) => {
+              const next = resolveCurrentProjectId(
+                projectsInWorkspace(projects, event.target.value),
+                readCurrentProjectId(),
+              );
+              if (next) {
+                selectProjectId(next);
+              }
+            }}
+          >
+            {workspaces.map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
       <nav className="flex flex-col gap-1">
         <SideLink href="/" active={pathname === "/"}>
           {t("nav.prompts")}
@@ -54,7 +97,7 @@ export function WorkspaceNav() {
         </SideLink>
       </nav>
 
-      {projects.length > 0 ? (
+      {workspaceProjects.length > 0 ? (
         <label className="flex flex-col gap-1 text-xs text-zinc-400">
           {t("project.switcher")}
           <select
@@ -65,11 +108,9 @@ export function WorkspaceNav() {
               selectProjectId(event.target.value);
             }}
           >
-            {projects.map((project) => (
+            {workspaceProjects.map((project) => (
               <option key={project.id} value={project.id}>
-                {project.teamName
-                  ? `${project.name} · ${project.teamName}`
-                  : project.name}
+                {project.name}
               </option>
             ))}
           </select>

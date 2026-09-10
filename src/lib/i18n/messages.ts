@@ -13,6 +13,7 @@ export const messages = {
     emptyPrompts: "プロンプトはまだありません",
     personal: "個人",
     projects: "プロジェクト",
+    workspace: "ワークスペース",
   },
   account: {
     useUser: "{name}に切り替え",

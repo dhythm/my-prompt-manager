@@ -12,9 +12,11 @@ test("home page renders and can be screenshotted", async ({ page }) => {
     page.getByText("ライブラリから選ぶか、新規作成してください。"),
   ).toHaveCount(0);
   await expect(page.getByText("agent@local.test")).toBeVisible();
+  await page.getByRole("button", { name: /agent@local.test/ }).click();
   await expect(
-    page.getByRole("button", { name: "Developerに切り替え" }),
+    page.getByRole("menuitem", { name: "Developerに切り替え" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: /agent@local.test/ }).click();
   await expect(
     page.getByRole("complementary").getByRole("button", { name: "新規作成" }),
   ).toBeVisible();
@@ -34,7 +36,8 @@ test("home page renders and can be screenshotted", async ({ page }) => {
   });
 
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.getByRole("button", { name: "ログアウト" }).click();
+  await page.getByRole("button", { name: /agent@local.test/ }).click();
+  await page.getByRole("menuitem", { name: "ログアウト" }).click();
   await expect(page.getByRole("heading", { name: "ログイン" })).toBeVisible();
   await page.screenshot({
     path: path.join(outputDir, "sign-in.png"),
