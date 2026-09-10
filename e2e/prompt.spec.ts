@@ -20,13 +20,24 @@ test("creates a prompt with system and user messages", async ({ page }) => {
   await expect(page.getByText("作成", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "編集" }).click();
+  const ran = page.waitForResponse(
+    (response) =>
+      response.url().includes("/runs") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "実行" }).click();
+  expect((await ran).ok()).toBeTruthy();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
-  await expect(page.getByRole("link", { name: /Grok 4.6/ }).first()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Grok 4.6/ }).first(),
+  ).toBeVisible();
   await expect(page.getByText("$0.000228")).toBeVisible();
   await expect(page.getByText("12 → 34")).toBeVisible();
   await expect(page.getByText(/Say hello/)).toHaveCount(0);
-  await page.getByRole("link", { name: /Grok 4.6/ }).first().click();
+  await page
+    .getByRole("link", { name: /Grok 4.6/ })
+    .first()
+    .click();
   await expect(page.getByLabel("出力")).toHaveText("stub-output");
   await expect(page.getByText(/Say hello/)).toBeVisible();
 });
@@ -142,4 +153,67 @@ test("compares versions with a colored line diff", async ({ page }) => {
   await expect(page.getByLabel("比較元")).toHaveValue("");
   await page.getByRole("button", { name: "編集に読み込む" }).click();
   await expect(page.getByLabel("ユーザープロンプト")).toHaveValue("");
+});
+
+test("keeps prompt chrome visible while the logs tab loads", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
+  await expect(page.getByLabel("プロンプト名")).toBeVisible();
+  await expect(page.getByRole("button", { name: "編集" })).toBeVisible();
+
+  await page.route("**/api/prompts/**/runs**", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await route.continue();
+  });
+
+  await page.getByRole("button", { name: "ログ", exact: true }).click();
+
+  await expect(page.getByLabel("プロンプト名")).toBeVisible();
+  await expect(page.getByRole("button", { name: "編集" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "プレイグラウンド" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "履歴" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "ログ", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("読み込み中...");
+});
+
+test("keeps history compare filters visible while a version loads", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "新規作成" })
+    .click();
+  await page.getByLabel("ユーザープロンプト").fill("Say hello");
+  await page.getByRole("button", { name: "バージョンを保存" }).click();
+  await expect(page.getByText("バージョン 2")).toBeVisible();
+
+  await page.route("**/api/prompts/**/versions/**", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await route.continue();
+  });
+
+  await page.getByRole("button", { name: "履歴" }).click();
+  await expect(page.getByLabel("比較元")).toBeVisible();
+  await expect(page.getByLabel("比較先")).toBeVisible();
+  await expect(page.getByRole("button", { name: "編集" })).toBeVisible();
+  await expect(page.getByLabel("プロンプト名")).toBeVisible();
+  await expect(page.getByText("読み込み中...")).toBeVisible();
 });

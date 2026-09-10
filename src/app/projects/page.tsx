@@ -1,6 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { ProjectsPanel } from "@/components/projects-panel";
 import { t } from "@/lib/i18n/t";
 import { projectsQuery } from "@/lib/queries/projects";
@@ -38,9 +37,7 @@ export default async function ProjectsPage() {
         <h1 className="mb-4 text-2xl font-semibold tracking-tight">
           {t("project.title")}
         </h1>
-        <Suspense fallback={<p className="text-sm">{t("project.loading")}</p>}>
-          <ProjectsPanel />
-        </Suspense>
+        <ProjectsPanel />
       </main>
     </HydrationBoundary>
   );

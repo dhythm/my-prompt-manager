@@ -104,17 +104,54 @@ test("home page renders and can be screenshotted", async ({ page }) => {
     page.getByRole("main").getByText("Grok 4.6").first(),
   ).toBeVisible();
 
-  await page.getByRole("main").getByRole("link", { name: /無題/ }).first().click();
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: /無題/ })
+    .first()
+    .click();
   await page.getByLabel("モデル").selectOption({ label: "Grok 4.6" });
+  const ran = page.waitForResponse(
+    (response) =>
+      response.url().includes("/runs") &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "実行" }).click();
+  expect((await ran).ok()).toBeTruthy();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
-  await expect(page.getByRole("link", { name: /Grok 4.6/ }).first()).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Grok 4.6/ }).first(),
+  ).toBeVisible();
   await expect(page.getByText("$0.000228")).toBeVisible();
   await expect(page.getByText(/あなたは親切なアシスタントです/)).toHaveCount(0);
   await page.screenshot({
     path: path.join(outputDir, "prompt-logs.png"),
     fullPage: true,
   });
-  await page.getByRole("link", { name: /Grok 4.6/ }).first().click();
+  await page
+    .getByRole("link", { name: /Grok 4.6/ })
+    .first()
+    .click();
   await expect(page.getByLabel("出力")).toHaveText("stub-output");
+});
+
+test("keeps the home heading while switching projects", async ({ page }) => {
+  await page.goto("/");
+  const heading = page.getByRole("heading", { name: "プロンプト", level: 1 });
+  await expect(heading).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("button", { name: "新規作成" }),
+  ).toBeVisible();
+
+  const switcher = page.getByLabel("プロジェクト");
+  const current = await switcher.inputValue();
+  const labels = await switcher.locator("option").allTextContents();
+  const next = labels.find((label) => label !== current);
+  if (next) {
+    await switcher.selectOption({ label: next });
+  }
+
+  await expect(heading).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("button", { name: "新規作成" }),
+  ).toBeVisible();
 });

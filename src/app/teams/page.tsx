@@ -1,8 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 import { TeamsPanel } from "@/components/teams-panel";
-import { t } from "@/lib/i18n/t";
 import { invitesQuery } from "@/lib/queries/invites";
 import { teamsQuery } from "@/lib/queries/teams";
 import { getQueryClient } from "@/lib/query/get-query-client";
@@ -41,18 +39,7 @@ export default async function TeamsPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="flex flex-col gap-4 p-6">
-        <Suspense
-          fallback={
-            <>
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {t("team.title")}
-              </h1>
-              <p className="text-sm">{t("team.loading")}</p>
-            </>
-          }
-        >
-          <TeamsPanel />
-        </Suspense>
+        <TeamsPanel />
       </main>
     </HydrationBoundary>
   );

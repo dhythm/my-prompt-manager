@@ -1,9 +1,10 @@
 "use client";
 
 import {
+  useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
-  useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -41,12 +42,10 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { data } = useSuspenseQuery(promptDetailQuery.options(promptId));
-  const { data: versions } = useSuspenseQuery(
+  const { data: versions = [] } = useQuery(
     promptVersionsQuery.options(promptId),
   );
-  const runsQuery = useSuspenseInfiniteQuery(promptRunsQuery.options(promptId));
-  const runs = runsQuery.data.pages.flatMap((page) => page.runs);
-  const { data: projects } = useSuspenseQuery(projectsQuery.options());
+  const { data: projects = [] } = useQuery(projectsQuery.options());
   const [tab, setTab] = useState<Tab>("editor");
   const [title, setTitle] = useState(data.prompt.title);
   const [model, setModel] = useState(data.version.model);
@@ -367,38 +366,47 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
         />
       ) : null}
 
-      {tab === "logs" ? (
-        <div className="flex flex-col gap-1.5">
-          {runs.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">
-              {t("prompt.emptyRuns")}
-            </p>
-          ) : (
-            <>
-              {runs.map((run) => (
-                <PromptRunSummary
-                  key={run.id}
-                  run={run}
-                  href={`/runs/${run.id}`}
-                />
-              ))}
-              {runsQuery.hasNextPage ? (
-                <button
-                  className="self-start rounded-md border border-[var(--line)] px-3 py-2 text-sm"
-                  type="button"
-                  onClick={() => runsQuery.fetchNextPage()}
-                  disabled={runsQuery.isFetchingNextPage}
-                >
-                  {runsQuery.isFetchingNextPage
-                    ? t("runs.loadingMore")
-                    : t("runs.loadMore")}
-                </button>
-              ) : null}
-            </>
-          )}
-        </div>
-      ) : null}
+      {tab === "logs" ? <PromptLogs promptId={promptId} /> : null}
     </section>
+  );
+}
+
+function PromptLogs({ promptId }: { promptId: string }) {
+  const runsQuery = useInfiniteQuery(promptRunsQuery.options(promptId));
+  const runs = runsQuery.data?.pages.flatMap((page) => page.runs) ?? [];
+
+  if (runsQuery.isPending) {
+    return (
+      <p className="text-sm text-[var(--muted)]" aria-busy="true" role="status">
+        {t("prompt.loading")}
+      </p>
+    );
+  }
+
+  if (runs.length === 0) {
+    return (
+      <p className="text-sm text-[var(--muted)]">{t("prompt.emptyRuns")}</p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {runs.map((run) => (
+        <PromptRunSummary key={run.id} run={run} href={`/runs/${run.id}`} />
+      ))}
+      {runsQuery.hasNextPage ? (
+        <button
+          className="self-start rounded-md border border-[var(--line)] px-3 py-2 text-sm"
+          type="button"
+          onClick={() => runsQuery.fetchNextPage()}
+          disabled={runsQuery.isFetchingNextPage}
+        >
+          {runsQuery.isFetchingNextPage
+            ? t("runs.loadingMore")
+            : t("runs.loadMore")}
+        </button>
+      ) : null}
+    </div>
   );
 }
 

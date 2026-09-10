@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { isHttpError } from "@/lib/api/http";
 import { t } from "@/lib/i18n/t";
@@ -19,8 +15,10 @@ import { teamsQuery } from "@/lib/queries/teams";
 
 export function ProjectsPanel() {
   const queryClient = useQueryClient();
-  const { data: projects } = useSuspenseQuery(projectsQuery.options());
-  const { data: teams } = useSuspenseQuery(teamsQuery.options());
+  const { data: projects, isPending: projectsPending } = useQuery(
+    projectsQuery.options(),
+  );
+  const { data: teams = [] } = useQuery(teamsQuery.options());
   const [name, setName] = useState("");
   const [teamId, setTeamId] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -71,7 +69,11 @@ export function ProjectsPanel() {
   return (
     <section className="flex flex-col gap-6 rounded-md border border-zinc-200 bg-white p-4">
       <ul className="flex flex-col gap-3 text-sm">
-        {projects.length === 0 ? (
+        {projectsPending || !projects ? (
+          <li className="text-zinc-600" role="status">
+            {t("project.loading")}
+          </li>
+        ) : projects.length === 0 ? (
           <li className="text-zinc-600">{t("project.empty")}</li>
         ) : (
           projects.map((project) => (

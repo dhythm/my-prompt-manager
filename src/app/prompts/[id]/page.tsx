@@ -5,18 +5,15 @@ import { PromptWorkspace } from "@/components/prompt-workspace";
 import { t } from "@/lib/i18n/t";
 import {
   promptDetailQuery,
-  promptRunsQuery,
   promptVersionsQuery,
 } from "@/lib/queries/prompt-detail";
 import { getQueryClient } from "@/lib/query/get-query-client";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
 import { isNotFoundError } from "@/server/errors";
-import { listPromptRuns } from "@/server/prompts/runs";
 import {
   serializeMessage,
   serializePrompt,
-  serializeRun,
   serializeVersion,
 } from "@/server/prompts/serialize";
 import { getPromptDetail, listPromptVersions } from "@/server/prompts/versions";
@@ -51,16 +48,6 @@ export default async function PromptPage({
       promptVersionsQuery.key(id),
       versions.map(serializeVersion),
     );
-    const runs = await listPromptRuns(db, user.id, id);
-    queryClient.setQueryData(promptRunsQuery.key(id), {
-      pages: [
-        {
-          runs: runs.runs.map(serializeRun),
-          nextCursor: runs.nextCursor,
-        },
-      ],
-      pageParams: [null],
-    });
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();

@@ -101,7 +101,9 @@ export function PromptHistory({
 
       {(fromVersion != null && !diff) ||
       (fromVersion == null && !toQuery.data) ? (
-        <p className="text-sm text-[var(--muted)]">{t("prompt.loading")}</p>
+        <p className="text-sm text-[var(--muted)]" role="status">
+          {t("prompt.loading")}
+        </p>
       ) : null}
       {fromVersion == null && toQuery.data ? (
         <VersionMessages messages={toQuery.data.messages} />

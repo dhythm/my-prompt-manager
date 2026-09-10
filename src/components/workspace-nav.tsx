@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { t } from "@/lib/i18n/t";
@@ -25,7 +21,7 @@ export function WorkspaceNav() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: projects } = useSuspenseQuery(projectsQuery.options());
+  const { data: projects = [] } = useQuery(projectsQuery.options());
   const { projectId, selectProjectId } = useCurrentProjectId(projects);
   const currentProject = projects.find((project) => project.id === projectId);
   const workspace = currentProject

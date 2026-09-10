@@ -1,5 +1,16 @@
 import { expect, test } from "@playwright/test";
 
+test("keeps the teams heading and create form visible", async ({ page }) => {
+  await page.goto("/teams");
+  await expect(
+    page.getByRole("heading", { name: "チーム", level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByPlaceholder("チーム名")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "チームを作成" }),
+  ).toBeVisible();
+});
+
 test("invites a dummy user to a team", async ({ page }) => {
   await page.goto("/teams");
   await expect(page.getByText("agent@local.test")).toBeVisible();

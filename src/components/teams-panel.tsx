@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { isHttpError } from "@/lib/api/http";
 import { teamRoleLabel } from "@/lib/i18n/labels";
@@ -20,11 +16,16 @@ import type { Team } from "@/lib/teams/types";
 
 export function TeamsPanel() {
   const queryClient = useQueryClient();
-  const { data: teams } = useSuspenseQuery(teamsQuery.options());
-  const { data: invites } = useSuspenseQuery(invitesQuery.options());
+  const { data: teams, isPending: teamsPending } = useQuery(
+    teamsQuery.options(),
+  );
+  const { data: invites, isPending: invitesPending } = useQuery(
+    invitesQuery.options(),
+  );
   const [teamName, setTeamName] = useState("");
   const [inviteEmails, setInviteEmails] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | undefined>();
+  const listsPending = teamsPending || invitesPending || !teams || !invites;
 
   async function invalidateWorkspace() {
     await Promise.all([
@@ -103,54 +104,67 @@ export function TeamsPanel() {
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-      {invites.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium">{t("team.pendingInvites")}</h2>
-          <ul className="flex flex-col gap-3">
-            {invites.map((item) => (
-              <li
-                key={item.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[var(--line)] bg-white px-4 py-3 shadow-[inset_3px_0_0_0_var(--accent)]"
-              >
-                <p className="font-medium">{item.teamName}</p>
-                <button
-                  className="shrink-0 rounded-md bg-[var(--ink)] px-3 py-1.5 text-sm text-white disabled:opacity-60"
-                  type="button"
-                  onClick={() => accept.mutate(item.id)}
-                  disabled={accept.isPending}
-                >
-                  {t("team.accept")}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {teams.length === 0 ? (
-        <p className="text-sm text-[var(--muted)]">{t("team.empty")}</p>
+      {listsPending ? (
+        <p className="text-sm text-[var(--muted)]" role="status">
+          {t("team.loading")}
+        </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {teams.map((team) => (
-            <TeamRow
-              key={team.id}
-              team={team}
-              email={inviteEmails[team.id] ?? ""}
-              onEmailChange={(email) =>
-                setInviteEmails((current) => ({ ...current, [team.id]: email }))
-              }
-              onInvite={() =>
-                invite.mutate({
-                  teamId: team.id,
-                  email: inviteEmails[team.id] ?? "",
-                })
-              }
-              inviting={
-                invite.isPending && invite.variables?.teamId === team.id
-              }
-            />
-          ))}
-        </ul>
+        <>
+          {invites.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              <h2 className="text-sm font-medium">
+                {t("team.pendingInvites")}
+              </h2>
+              <ul className="flex flex-col gap-3">
+                {invites.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[var(--line)] bg-white px-4 py-3 shadow-[inset_3px_0_0_0_var(--accent)]"
+                  >
+                    <p className="font-medium">{item.teamName}</p>
+                    <button
+                      className="shrink-0 rounded-md bg-[var(--ink)] px-3 py-1.5 text-sm text-white disabled:opacity-60"
+                      type="button"
+                      onClick={() => accept.mutate(item.id)}
+                      disabled={accept.isPending}
+                    >
+                      {t("team.accept")}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {teams.length === 0 ? (
+            <p className="text-sm text-[var(--muted)]">{t("team.empty")}</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {teams.map((team) => (
+                <TeamRow
+                  key={team.id}
+                  team={team}
+                  email={inviteEmails[team.id] ?? ""}
+                  onEmailChange={(email) =>
+                    setInviteEmails((current) => ({
+                      ...current,
+                      [team.id]: email,
+                    }))
+                  }
+                  onInvite={() =>
+                    invite.mutate({
+                      teamId: team.id,
+                      email: inviteEmails[team.id] ?? "",
+                    })
+                  }
+                  inviting={
+                    invite.isPending && invite.variables?.teamId === team.id
+                  }
+                />
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );
