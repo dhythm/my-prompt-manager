@@ -19,10 +19,13 @@ test("creates a prompt with system and user messages", async ({ page }) => {
   await expect(page.getByText("作成", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "編集" }).click();
-  await page.getByRole("button", { name: "実行を記録" }).click();
+  await page.getByRole("button", { name: "実行" }).click();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
   await expect(page.getByText("Grok 4.6")).toBeVisible();
   await expect(page.getByText(/Say hello/)).toBeVisible();
+  await expect(page.getByLabel("出力")).toHaveText("stub-output");
+  await expect(page.getByText("$0.000228")).toBeVisible();
+  await expect(page.getByText("12 → 34")).toBeVisible();
 });
 
 const systemV2 = [

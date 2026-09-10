@@ -6,12 +6,23 @@ import {
   ensureDummyUsers,
 } from "@/server/auth/dummy/users";
 import { createPgliteDatabase } from "@/server/db/pglite";
+import type { CompleteChat } from "@/server/llm/complete-chat";
+import {
+  createLlmConfigError,
+  createLlmRequestError,
+} from "@/server/llm/errors";
 import { createPrompt } from "./repository";
 import { createPromptRun, listPromptRuns, listWorkspaceRuns } from "./runs";
 import { getPromptDetail, savePromptVersion } from "./versions";
 
 const agentId = DUMMY_DEFAULT_USER_ID;
 const developerId = dummyUsers[1].id;
+
+const stubCompleteChat: CompleteChat = async ({ modelId }) => ({
+  text: `reply:${modelId}`,
+  inputTokens: 12,
+  outputTokens: 34,
+});
 
 describe("prompt runs", () => {
   const databases: Array<{ close: () => Promise<void> }> = [];
@@ -27,9 +38,14 @@ describe("prompt runs", () => {
       body: "Say hello",
     });
 
-    const run = await createPromptRun(db, agentId, prompt.id);
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      completeChat: stubCompleteChat,
+    });
     expect(run.status).toBe("succeeded");
-    expect(run.output.length).toBeGreaterThan(0);
+    expect(run.output).toBe("reply:grok-4.6");
+    expect(run.inputTokens).toBe(12);
+    expect(run.outputTokens).toBe(34);
+    expect(run.costUsd).toBe("0.0002280000");
 
     const logs = await listPromptRuns(db, agentId, prompt.id);
     expect(logs).toHaveLength(1);
@@ -63,8 +79,8 @@ describe("prompt runs", () => {
     });
 
     const run = await createPromptRun(db, agentId, prompt.id, {
-      name: "Ada",
-      topic: "math",
+      variables: { name: "Ada", topic: "math" },
+      completeChat: stubCompleteChat,
     });
 
     expect(run.input).toBe("system: You help Ada.\n\nuser: Talk about math.");
@@ -83,7 +99,9 @@ describe("prompt runs", () => {
       body: "Hello {{name}}",
     });
 
-    const run = await createPromptRun(db, agentId, prompt.id, {});
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      completeChat: stubCompleteChat,
+    });
     expect(run.input).toContain("Hello {{name}}");
   });
 
@@ -93,11 +111,69 @@ describe("prompt runs", () => {
       title: "Greeting",
       body: "Say hello",
     });
-    await createPromptRun(db, agentId, prompt.id);
+    await createPromptRun(db, agentId, prompt.id, {
+      completeChat: stubCompleteChat,
+    });
 
     await expect(
       listPromptRuns(db, developerId, prompt.id),
     ).rejects.toThrowError(t("error.promptNotFound"));
+  });
+
+  it("uses the requested model for the completion and cost", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      model: "gpt-5.6",
+      completeChat: stubCompleteChat,
+    });
+
+    expect(run.model).toBe("gpt-5.6");
+    expect(run.output).toBe("reply:gpt-5.6");
+    expect(run.costUsd).toBe("0.0007280000");
+  });
+
+  it("stores a failed run when the provider request fails", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      completeChat: async () => {
+        throw createLlmRequestError(t("error.llmRequestFailed"));
+      },
+    });
+
+    expect(run.status).toBe("failed");
+    expect(run.output).toBe(t("error.llmRequestFailed"));
+    expect(run.costUsd).toBeNull();
+    expect(await listPromptRuns(db, agentId, prompt.id)).toHaveLength(1);
+  });
+
+  it("does not insert a run when the provider key is missing", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+
+    await expect(
+      createPromptRun(db, agentId, prompt.id, {
+        completeChat: async () => {
+          throw createLlmConfigError(
+            t("error.llmKeyMissing", { name: "XAI_API_KEY" }),
+          );
+        },
+      }),
+    ).rejects.toThrowError(t("error.llmKeyMissing", { name: "XAI_API_KEY" }));
+
+    expect(await listPromptRuns(db, agentId, prompt.id)).toHaveLength(0);
   });
 
   async function openDatabase() {

@@ -24,22 +24,33 @@ const VARIABLE_VALUE_MAX_LENGTH = 10_000;
 
 export function parseRecordRunInput(value: unknown): {
   variables: Record<string, string>;
+  model?: string;
 } {
   if (value === undefined || value === null) {
     return { variables: {} };
   }
   const record = asObject(value);
-  if (record.variables === undefined || record.variables === null) {
-    return { variables: {} };
+  const model =
+    record.model === undefined || record.model === null
+      ? undefined
+      : parseRequiredText(record.model, "field.model", 80);
+  const variables = parseVariables(record.variables);
+  return {
+    variables,
+    ...(model ? { model } : {}),
+  };
+}
+
+function parseVariables(value: unknown): Record<string, string> {
+  if (value === undefined || value === null) {
+    return {};
   }
-  if (typeof record.variables !== "object" || Array.isArray(record.variables)) {
+  if (typeof value !== "object" || Array.isArray(value)) {
     throw createValidationError(t("validation.variablesObject"));
   }
 
   const variables: Record<string, string> = {};
-  for (const [name, raw] of Object.entries(
-    record.variables as Record<string, unknown>,
-  )) {
+  for (const [name, raw] of Object.entries(value as Record<string, unknown>)) {
     if (!VARIABLE_NAME.test(name)) {
       throw createValidationError(
         t("validation.variableNameInvalid", { name }),
@@ -60,7 +71,7 @@ export function parseRecordRunInput(value: unknown): {
     }
     variables[name] = raw;
   }
-  return { variables };
+  return variables;
 }
 
 export function parseSavePromptInput(value: unknown): {

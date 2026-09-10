@@ -5,11 +5,16 @@ import {
   isForbiddenError,
   isNotFoundError,
 } from "@/server/errors";
+import { isLlmConfigError } from "@/server/llm/errors";
 import { isValidationError } from "@/server/prompts/input";
 import { isTeamInputError } from "@/server/teams/input";
 
 export function errorResponse(error: unknown, fallback: string) {
-  if (isValidationError(error) || isTeamInputError(error)) {
+  if (
+    isValidationError(error) ||
+    isTeamInputError(error) ||
+    isLlmConfigError(error)
+  ) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
   if (isForbiddenError(error)) {

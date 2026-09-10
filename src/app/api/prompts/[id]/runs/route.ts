@@ -7,6 +7,8 @@ import { parseRecordRunInput } from "@/server/prompts/input";
 import { createPromptRun, listPromptRuns } from "@/server/prompts/runs";
 import { serializeRun } from "@/server/prompts/serialize";
 
+export const maxDuration = 60;
+
 export async function GET(
   _request: Request,
   context: RouteContext<"/api/prompts/[id]/runs">,
@@ -37,9 +39,9 @@ export async function POST(
     }
 
     const { id } = await context.params;
-    const { variables } = parseRecordRunInput(await request.json());
+    const { variables, model } = parseRecordRunInput(await request.json());
     const db = await getDb();
-    const run = await createPromptRun(db, user.id, id, variables);
+    const run = await createPromptRun(db, user.id, id, { variables, model });
     return NextResponse.json({ run: serializeRun(run) }, { status: 201 });
   } catch (error) {
     return errorResponse(error, t("error.runRecordFailed"));

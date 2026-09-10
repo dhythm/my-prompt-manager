@@ -88,10 +88,14 @@ export async function savePromptRequest(
 
 export async function recordRunRequest(
   id: string,
-  variables: Record<string, string> = {},
+  input: {
+    variables?: Record<string, string>;
+    model?: string;
+  } = {},
 ) {
   const data = await postJson<{ run: PromptRun }>(`/api/prompts/${id}/runs`, {
-    variables,
+    variables: input.variables ?? {},
+    ...(input.model ? { model: input.model } : {}),
   });
   return data.run;
 }

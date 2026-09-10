@@ -52,5 +52,8 @@ export type PromptRun = {
   input: string;
   output: string;
   status: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  costUsd: string | null;
   createdAt: string;
 };

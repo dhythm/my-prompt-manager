@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   check,
   integer,
+  numeric,
   pgTable,
   primaryKey,
   text,
@@ -170,6 +171,9 @@ export const promptRuns = pgTable("prompt_runs", {
   input: text().notNull(),
   output: text().notNull(),
   status: text().notNull(),
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  costUsd: numeric("cost_usd", { precision: 16, scale: 10 }),
   createdByUserId: uuid("created_by_user_id").references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

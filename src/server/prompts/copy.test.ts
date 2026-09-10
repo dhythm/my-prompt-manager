@@ -52,7 +52,13 @@ describe("copyPromptToProject", () => {
         { role: "user", content: "Say hello in one word." },
       ],
     });
-    await createPromptRun(db, agentId, source.id);
+    await createPromptRun(db, agentId, source.id, {
+      completeChat: async () => ({
+        text: "copied-run",
+        inputTokens: 1,
+        outputTokens: 1,
+      }),
+    });
 
     const copied = await copyPromptToProject(
       db,

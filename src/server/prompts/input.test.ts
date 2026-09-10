@@ -102,4 +102,20 @@ describe("parseRecordRunInput", () => {
       t("validation.variableValueMustBeString", { name: "name" }),
     );
   });
+
+  it("accepts an optional model override", () => {
+    expect(parseRecordRunInput({ model: "gpt-5.6" })).toEqual({
+      variables: {},
+      model: "gpt-5.6",
+    });
+    expect(
+      parseRecordRunInput({
+        model: "  grok-4.6  ",
+        variables: { name: "Ada" },
+      }),
+    ).toEqual({
+      variables: { name: "Ada" },
+      model: "grok-4.6",
+    });
+  });
 });

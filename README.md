@@ -24,6 +24,17 @@ Auth defaults to dummy accounts (`agent@local.test` and `dev@local.test`). The A
 
 Prompts are either personal (only the owner) or owned by a team (all members can view and update). Each prompt has a model, system/user/assistant messages, a version history, and run logs. Create a team, invite by email, and transfer a personal prompt into a team. Dummy users can invite each other (`dev@local.test`) without Clerk or SMTP.
 
+Running a prompt calls the selected model with the saved messages (and variable values, if any). Set provider keys in `.env`; they stay on the server. Logs store the model output, token counts, and an estimated USD cost from catalog rates.
+
+```bash
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+XAI_API_KEY=
+```
+
+Playwright sets `PROMPT_LLM_MODE=stub` so e2e does not call paid APIs. Do not use stub in production.
+
 Clerk is reserved for production later:
 
 ```bash

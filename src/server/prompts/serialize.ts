@@ -69,6 +69,9 @@ export function serializeRun(run: {
   input: string;
   output: string;
   status: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  costUsd: string | null;
   createdAt: Date;
 }): PromptRun {
   return {
@@ -79,6 +82,9 @@ export function serializeRun(run: {
     input: run.input,
     output: run.output,
     status: run.status,
+    inputTokens: run.inputTokens,
+    outputTokens: run.outputTokens,
+    costUsd: run.costUsd,
     createdAt: run.createdAt.toISOString(),
   };
 }

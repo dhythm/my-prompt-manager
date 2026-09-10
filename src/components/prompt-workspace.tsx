@@ -29,6 +29,7 @@ import {
   promptVersionsQuery,
   recordRunRequest,
   savePromptRequest,
+  workspaceRunsQuery,
 } from "@/lib/queries/prompt-detail";
 import { promptsQuery } from "@/lib/queries/prompts";
 
@@ -118,12 +119,19 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
   }
 
   const recordRun = useMutation({
-    mutationFn: () => recordRunRequest(promptId, filledValues(variableValues)),
+    mutationFn: () =>
+      recordRunRequest(promptId, {
+        variables: filledValues(variableValues),
+        model,
+      }),
     onSuccess: async () => {
       setError(undefined);
-      await queryClient.invalidateQueries({
-        queryKey: promptRunsQuery.key(promptId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: promptRunsQuery.key(promptId),
+        }),
+        queryClient.invalidateQueries({ queryKey: workspaceRunsQuery.key }),
+      ]);
     },
     onError: (err) => {
       setError(isHttpError(err) ? err.message : t("prompt.recordFailed"));
