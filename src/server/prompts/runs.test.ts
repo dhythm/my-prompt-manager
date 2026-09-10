@@ -12,7 +12,12 @@ import {
   createLlmRequestError,
 } from "@/server/llm/errors";
 import { createPrompt } from "./repository";
-import { createPromptRun, listPromptRuns, listWorkspaceRuns } from "./runs";
+import {
+  createPromptRun,
+  getPromptRun,
+  listPromptRuns,
+  listWorkspaceRuns,
+} from "./runs";
 import { getPromptDetail, savePromptVersion } from "./versions";
 
 const agentId = DUMMY_DEFAULT_USER_ID;
@@ -174,6 +179,26 @@ describe("prompt runs", () => {
     ).rejects.toThrowError(t("error.llmKeyMissing", { name: "XAI_API_KEY" }));
 
     expect(await listPromptRuns(db, agentId, prompt.id)).toHaveLength(0);
+  });
+
+  it("loads a run the user can access and hides others", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      completeChat: stubCompleteChat,
+    });
+
+    await expect(getPromptRun(db, agentId, run.id)).resolves.toMatchObject({
+      id: run.id,
+      promptTitle: "Greeting",
+      output: "reply:grok-4.6",
+    });
+    await expect(getPromptRun(db, developerId, run.id)).rejects.toThrowError(
+      t("error.promptNotFound"),
+    );
   });
 
   async function openDatabase() {

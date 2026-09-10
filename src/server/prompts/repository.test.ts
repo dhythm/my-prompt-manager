@@ -17,6 +17,7 @@ import {
   transferPrompt,
   updatePrompt,
 } from "./repository";
+import { savePromptVersion } from "./versions";
 
 const agentId = DUMMY_DEFAULT_USER_ID;
 const developerId = dummyUsers[1].id;
@@ -39,6 +40,7 @@ describe("prompts repository", () => {
 
     const agentPrompts = await listPrompts(db, agentId);
     expect(agentPrompts).toHaveLength(1);
+    expect(agentPrompts[0]?.model).toBe("grok-4.6");
     await expect(listPrompts(db, developerId)).resolves.toEqual([]);
   });
 
@@ -96,6 +98,25 @@ describe("prompts repository", () => {
     });
     await acceptInvite(db, developerId, invite.id);
     await expect(listPrompts(db, developerId)).resolves.toHaveLength(1);
+  });
+
+  it("lists the latest saved model for each prompt", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+    await savePromptVersion(db, agentId, prompt.id, {
+      title: "Greeting",
+      model: "gpt-5.6",
+      messages: [
+        { role: "system", content: "Be brief." },
+        { role: "user", content: "Say hello" },
+      ],
+    });
+
+    const listed = await listPrompts(db, agentId);
+    expect(listed[0]?.model).toBe("gpt-5.6");
   });
 
   it("lists prompts newest first for the current user", async () => {

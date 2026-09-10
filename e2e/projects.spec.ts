@@ -63,12 +63,17 @@ test("creates a project and copies a prompt with version history", async ({
     fullPage: true,
   });
 
+  await page.getByRole("link", { name: "プロンプト", exact: true }).click();
   await page.getByLabel("ワークスペース").selectOption({ label: "個人" });
   await page.getByLabel("プロジェクト").selectOption({ label: production });
-  await expect(page.getByRole("link", { name: /Greeting/ })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: /Greeting/ }),
+  ).toBeVisible();
 
   await page.getByLabel("プロジェクト").selectOption({ label: development });
-  await expect(page.getByRole("link", { name: /Greeting/ })).toHaveCount(1);
+  await expect(
+    page.getByRole("main").getByRole("link", { name: /Greeting/ }),
+  ).toHaveCount(1);
 });
 
 async function createProject(page: Page, name: string) {

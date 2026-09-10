@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { promptVersionDetailQuery, promptVersionsQuery } from "./prompt-detail";
+import {
+  promptVersionDetailQuery,
+  promptVersionsQuery,
+  runDetailQuery,
+} from "./prompt-detail";
 
 describe("prompt version queries", () => {
   it("keeps a stable versions list key", () => {
@@ -18,5 +22,9 @@ describe("prompt version queries", () => {
     expect(promptVersionDetailQuery.options("prompt-1", 2).staleTime).toBe(
       60_000,
     );
+  });
+
+  it("keys run detail by run id", () => {
+    expect(runDetailQuery.key("run-1")).toEqual(["run", "run-1"]);
   });
 });

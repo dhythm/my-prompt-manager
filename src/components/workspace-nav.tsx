@@ -25,7 +25,6 @@ export function WorkspaceNav() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: prompts } = useSuspenseQuery(promptsQuery.options());
   const { data: projects } = useSuspenseQuery(projectsQuery.options());
   const { projectId, selectProjectId } = useCurrentProjectId(projects);
   const currentProject = projects.find((project) => project.id === projectId);
@@ -36,10 +35,6 @@ export function WorkspaceNav() {
   const workspaceProjects = workspace
     ? projectsInWorkspace(projects, workspace)
     : projects;
-
-  const visiblePrompts = projectId
-    ? prompts.filter((prompt) => prompt.projectId === projectId)
-    : prompts;
 
   const createPrompt = useMutation({
     mutationFn: () =>
@@ -125,37 +120,6 @@ export function WorkspaceNav() {
       >
         {createPrompt.isPending ? t("nav.creating") : t("nav.newPrompt")}
       </button>
-
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-        <p className="text-xs text-zinc-400">{t("nav.library")}</p>
-        {visiblePrompts.length === 0 ? (
-          <p className="text-zinc-500">{t("nav.emptyPrompts")}</p>
-        ) : (
-          <ul className="flex flex-col gap-1">
-            {visiblePrompts.map((prompt) => {
-              const href = `/prompts/${prompt.id}`;
-              const active = pathname === href;
-              return (
-                <li key={prompt.id}>
-                  <Link
-                    href={href}
-                    className={`block rounded-md px-2 py-2 ${
-                      active
-                        ? "bg-white/10 text-white"
-                        : "text-zinc-300 hover:bg-white/5"
-                    }`}
-                  >
-                    <span className="block truncate">{prompt.title}</span>
-                    <span className="block truncate text-xs text-zinc-500">
-                      {prompt.teamName ?? t("nav.personal")}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
     </aside>
   );
 }

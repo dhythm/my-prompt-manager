@@ -55,3 +55,20 @@ export function filledValues(
     Object.entries(values).filter(([, value]) => value.trim() !== ""),
   );
 }
+
+export function dummyVariableValues(names: string[]): Record<string, string> {
+  return Object.fromEntries(names.map((name) => [name, `sample-${name}`]));
+}
+
+export function withDummyVariableValues(
+  names: string[],
+  values: Record<string, string>,
+): Record<string, string> {
+  const dummy = dummyVariableValues(names);
+  return Object.fromEntries(
+    names.map((name) => {
+      const value = values[name];
+      return [name, value && value.trim() !== "" ? value : dummy[name]];
+    }),
+  );
+}

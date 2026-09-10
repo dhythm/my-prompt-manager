@@ -2,6 +2,7 @@ export type Prompt = {
   id: string;
   title: string;
   body: string;
+  model: string;
   ownerUserId: string | null;
   teamId: string | null;
   teamName: string | null;

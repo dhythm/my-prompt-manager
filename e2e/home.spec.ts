@@ -99,15 +99,21 @@ test("home page renders and can be screenshotted", async ({ page }) => {
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "編集" }).click();
+  await page.getByRole("link", { name: "プロンプト", exact: true }).click();
+  await expect(
+    page.getByRole("main").getByText("Grok 4.6").first(),
+  ).toBeVisible();
+
+  await page.getByRole("main").getByRole("link", { name: /無題/ }).first().click();
   await page.getByRole("button", { name: "実行" }).click();
   await page.getByRole("button", { name: "ログ", exact: true }).click();
   await expect(page.getByText("Grok 4.6")).toBeVisible();
-  await expect(page.getByText(/あなたは親切なアシスタントです/)).toBeVisible();
-  await expect(page.getByLabel("出力")).toHaveText("stub-output");
   await expect(page.getByText("$0.000228")).toBeVisible();
+  await expect(page.getByText(/あなたは親切なアシスタントです/)).toHaveCount(0);
   await page.screenshot({
     path: path.join(outputDir, "prompt-logs.png"),
     fullPage: true,
   });
+  await page.getByRole("link", { name: /Grok 4.6/ }).click();
+  await expect(page.getByLabel("出力")).toHaveText("stub-output");
 });

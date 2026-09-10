@@ -1,7 +1,13 @@
-import { and, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, max, or } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
 import { defaultPromptModel } from "@/lib/prompts/models";
-import { projects, prompts, teamMembers, teams } from "@/server/db/schema";
+import {
+  projects,
+  prompts,
+  promptVersions,
+  teamMembers,
+  teams,
+} from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createForbiddenError } from "@/server/errors";
 import { resolveProjectForCreate } from "@/server/projects/repository";
@@ -28,11 +34,21 @@ export async function listPrompts(
     ? and(visible, eq(prompts.projectId, projectId))
     : visible;
 
+  const latestVersions = db
+    .select({
+      promptId: promptVersions.promptId,
+      versionNumber: max(promptVersions.versionNumber).as("version_number"),
+    })
+    .from(promptVersions)
+    .groupBy(promptVersions.promptId)
+    .as("latest_versions");
+
   return db
     .select({
       id: prompts.id,
       title: prompts.title,
       body: prompts.body,
+      model: promptVersions.model,
       ownerUserId: prompts.ownerUserId,
       teamId: prompts.teamId,
       teamName: teams.name,
@@ -45,6 +61,14 @@ export async function listPrompts(
     .from(prompts)
     .leftJoin(teams, eq(teams.id, prompts.teamId))
     .leftJoin(projects, eq(projects.id, prompts.projectId))
+    .leftJoin(latestVersions, eq(latestVersions.promptId, prompts.id))
+    .leftJoin(
+      promptVersions,
+      and(
+        eq(promptVersions.promptId, latestVersions.promptId),
+        eq(promptVersions.versionNumber, latestVersions.versionNumber),
+      ),
+    )
     .where(filter)
     .orderBy(desc(prompts.createdAt), desc(prompts.id));
 }

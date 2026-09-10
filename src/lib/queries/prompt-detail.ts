@@ -74,6 +74,19 @@ export const workspaceRunsQuery = {
     }),
 };
 
+export const runDetailQuery = {
+  key: (id: string) => ["run", id] as const,
+  options: (id: string) =>
+    queryOptions({
+      queryKey: runDetailQuery.key(id),
+      queryFn: async () => {
+        const data = await getJson<{ run: PromptRun }>(`/api/runs/${id}`);
+        return data.run;
+      },
+      staleTime: 60_000,
+    }),
+};
+
 export async function savePromptRequest(
   id: string,
   input: {

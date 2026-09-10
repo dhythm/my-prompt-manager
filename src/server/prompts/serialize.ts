@@ -1,3 +1,4 @@
+import { defaultPromptModel } from "@/lib/prompts/models";
 import type {
   Prompt,
   PromptMessage,
@@ -9,6 +10,7 @@ export function serializePrompt(prompt: {
   id: string;
   title: string;
   body: string;
+  model?: string | null;
   ownerUserId: string | null;
   teamId: string | null;
   teamName?: string | null;
@@ -21,6 +23,7 @@ export function serializePrompt(prompt: {
     id: prompt.id,
     title: prompt.title,
     body: prompt.body,
+    model: prompt.model ?? defaultPromptModel,
     ownerUserId: prompt.ownerUserId,
     teamId: prompt.teamId,
     teamName: prompt.teamName ?? null,

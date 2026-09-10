@@ -32,11 +32,14 @@ test("fills variables, previews expansion, and records expanded run input", asyn
   await page.getByRole("button", { name: "バージョンを保存" }).click();
   await expect(page.getByText("バージョン 2")).toBeVisible();
 
+  await page.getByRole("button", { name: "プレイグラウンド" }).click();
+  await expect(page.getByRole("textbox", { name: "name" })).toHaveValue(
+    "sample-name",
+  );
+  await page.getByRole("textbox", { name: "name" }).fill("Ada");
   await page.getByRole("button", { name: "実行" }).click();
-  await page.getByRole("button", { name: "ログ", exact: true }).click();
-  await expect(page.getByText("user: Hello Ada")).toBeVisible();
-  await expect(page.getByText("{{name}}")).toHaveCount(0);
-  await expect(page.getByText("Grok 4.6")).toBeVisible();
   await expect(page.getByLabel("出力")).toHaveText("stub-output");
+  await expect(page.getByText("Hello Ada", { exact: true })).toBeVisible();
+  await expect(page.getByText("{{name}}")).toHaveCount(0);
   await expect(page.getByText("$0.000228")).toBeVisible();
 });

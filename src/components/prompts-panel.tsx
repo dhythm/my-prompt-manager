@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n/t";
 import { useCurrentProjectId } from "@/lib/projects/use-current-project-id";
+import { promptModelLabel } from "@/lib/prompts/models";
 import { projectsQuery } from "@/lib/queries/projects";
 import { createPromptRequest, promptsQuery } from "@/lib/queries/prompts";
 
@@ -64,11 +65,13 @@ export function PromptsPanel() {
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <p className="truncate font-medium">{prompt.title}</p>
                   <p className="shrink-0 text-sm text-[var(--muted)]">
-                    {prompt.teamName ?? t("nav.personal")}
+                    {promptModelLabel(prompt.model)}
                   </p>
                 </div>
                 <p className="mt-1 text-sm text-[var(--muted)]">
                   {formatDateTime(prompt.updatedAt)}
+                  <span className="mx-2">·</span>
+                  {prompt.teamName ?? t("nav.personal")}
                 </p>
               </Link>
             </li>

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  dummyVariableValues,
   extractVariables,
   extractVariablesFromTexts,
   filledValues,
   missingVariables,
   substitute,
+  withDummyVariableValues,
 } from "./template";
 
 describe("extractVariables", () => {
@@ -103,5 +105,25 @@ describe("missingVariables", () => {
 describe("filledValues", () => {
   it("drops blank values so preview can leave those placeholders", () => {
     expect(filledValues({ name: "Ada", topic: "  " })).toEqual({ name: "Ada" });
+  });
+});
+
+describe("dummyVariableValues", () => {
+  it("fills each name with a sample value", () => {
+    expect(dummyVariableValues(["name", "topic"])).toEqual({
+      name: "sample-name",
+      topic: "sample-topic",
+    });
+  });
+});
+
+describe("withDummyVariableValues", () => {
+  it("keeps provided values and fills the rest", () => {
+    expect(
+      withDummyVariableValues(["name", "topic"], { name: "Ada", topic: "  " }),
+    ).toEqual({
+      name: "Ada",
+      topic: "sample-topic",
+    });
   });
 });

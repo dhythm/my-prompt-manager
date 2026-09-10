@@ -4,6 +4,7 @@ import { estimateCostUsd } from "@/lib/prompts/models";
 import { substitute } from "@/lib/prompts/template";
 import { promptRuns, prompts } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
+import { createNotFoundError } from "@/server/errors";
 import {
   type ChatMessage,
   type CompleteChat,
@@ -103,6 +104,26 @@ export async function createPromptRun(
   }
 
   return { ...run, promptTitle: detail.prompt.title };
+}
+
+export async function getPromptRun(
+  db: AppDatabase,
+  userId: string,
+  runId: string,
+) {
+  const [run] = await db
+    .select(runColumns)
+    .from(promptRuns)
+    .innerJoin(prompts, eq(prompts.id, promptRuns.promptId))
+    .where(eq(promptRuns.id, runId))
+    .limit(1);
+
+  if (!run) {
+    throw createNotFoundError(t("error.runNotFound"));
+  }
+
+  await getReadablePrompt(db, userId, run.promptId);
+  return run;
 }
 
 export async function listPromptRuns(

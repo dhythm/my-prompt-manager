@@ -8,7 +8,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PromptHistory } from "@/components/prompt-history";
-import { PromptRunCard } from "@/components/prompt-run-card";
+import { PromptPlayground } from "@/components/prompt-playground";
+import { PromptRunSummary } from "@/components/prompt-run-card";
 import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
@@ -33,7 +34,7 @@ import {
 } from "@/lib/queries/prompt-detail";
 import { promptsQuery } from "@/lib/queries/prompts";
 
-type Tab = "editor" | "history" | "logs";
+type Tab = "editor" | "playground" | "history" | "logs";
 
 export function PromptWorkspace({ promptId }: { promptId: string }) {
   const queryClient = useQueryClient();
@@ -200,6 +201,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
         <TabButton current={tab} id="editor" onSelect={setTab}>
           {t("prompt.editor")}
         </TabButton>
+        <TabButton current={tab} id="playground" onSelect={setTab}>
+          {t("prompt.playground")}
+        </TabButton>
         <TabButton current={tab} id="history" onSelect={setTab}>
           {t("prompt.history")}
         </TabButton>
@@ -345,6 +349,14 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
         </div>
       ) : null}
 
+      {tab === "playground" ? (
+        <PromptPlayground
+          promptId={promptId}
+          model={model}
+          messages={data.messages}
+        />
+      ) : null}
+
       {tab === "history" ? (
         <PromptHistory
           promptId={promptId}
@@ -354,13 +366,19 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       ) : null}
 
       {tab === "logs" ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
           {runs.length === 0 ? (
             <p className="text-sm text-[var(--muted)]">
               {t("prompt.emptyRuns")}
             </p>
           ) : (
-            runs.map((run) => <PromptRunCard key={run.id} run={run} />)
+            runs.map((run) => (
+              <PromptRunSummary
+                key={run.id}
+                run={run}
+                href={`/runs/${run.id}`}
+              />
+            ))
           )}
         </div>
       ) : null}

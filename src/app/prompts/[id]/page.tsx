@@ -38,7 +38,11 @@ export default async function PromptPage({
   try {
     const detail = await getPromptDetail(db, user.id, id);
     queryClient.setQueryData(promptDetailQuery.key(id), {
-      prompt: serializePrompt({ ...detail.prompt, teamName: null }),
+      prompt: serializePrompt({
+        ...detail.prompt,
+        teamName: null,
+        model: detail.version.model,
+      }),
       version: serializeVersion(detail.version),
       messages: detail.messages.map(serializeMessage),
     });

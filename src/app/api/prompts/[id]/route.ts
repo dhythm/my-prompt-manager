@@ -25,7 +25,11 @@ export async function GET(
     const db = await getDb();
     const detail = await getPromptDetail(db, user.id, id);
     return NextResponse.json({
-      prompt: serializePrompt({ ...detail.prompt, teamName: null }),
+      prompt: serializePrompt({
+        ...detail.prompt,
+        teamName: null,
+        model: detail.version.model,
+      }),
       version: serializeVersion(detail.version),
       messages: detail.messages.map(serializeMessage),
     });
@@ -49,7 +53,11 @@ export async function PATCH(
     const db = await getDb();
     const saved = await savePromptVersion(db, user.id, id, input);
     return NextResponse.json({
-      prompt: serializePrompt({ ...saved.prompt, teamName: null }),
+      prompt: serializePrompt({
+        ...saved.prompt,
+        teamName: null,
+        model: saved.version.model,
+      }),
       version: serializeVersion(saved.version),
     });
   } catch (error) {
