@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { PromptRunCard } from "@/components/prompt-run-card";
+import { RunBusyButton, RunBusyStatus } from "@/components/prompt-run-progress";
 import { PromptVariablesPanel } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
@@ -83,6 +84,7 @@ export function PromptPlayground({
         values={values}
         missing={[]}
         previewMessages={previewMessages}
+        disabled={run.isPending}
         onChange={(name, value) =>
           setValues((current) => ({ ...current, [name]: value }))
         }
@@ -91,15 +93,9 @@ export function PromptPlayground({
         <PromptPreview messages={previewMessages} />
       ) : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      <button
-        className="self-start rounded-md bg-[var(--ink)] px-4 py-2 text-sm text-white"
-        type="button"
-        onClick={() => run.mutate()}
-        disabled={run.isPending}
-      >
-        {run.isPending ? t("prompt.recording") : t("prompt.recordRun")}
-      </button>
-      {result ? <PromptRunCard run={result} /> : null}
+      <RunBusyButton pending={run.isPending} onClick={() => run.mutate()} />
+      <RunBusyStatus pending={run.isPending} />
+      {run.isPending ? null : result ? <PromptRunCard run={result} /> : null}
     </div>
   );
 }

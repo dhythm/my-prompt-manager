@@ -12,18 +12,14 @@ import { useMemo, useState } from "react";
 import { PromptHistory } from "@/components/prompt-history";
 import { PromptPlayground } from "@/components/prompt-playground";
 import { PromptRunSummary } from "@/components/prompt-run-card";
-import { PromptVariablesPanel } from "@/components/prompt-variables";
+import { RunBusyButton, RunBusyStatus } from "@/components/prompt-run-progress";
+import { PromptVariableNames } from "@/components/prompt-variables";
 import { isHttpError } from "@/lib/api/http";
 import { messageRoleLabel } from "@/lib/i18n/labels";
 import { t } from "@/lib/i18n/t";
 import { writeCurrentProjectId } from "@/lib/projects/current";
 import { promptModelOptions } from "@/lib/prompts/models";
-import {
-  extractVariablesFromTexts,
-  filledValues,
-  missingVariables,
-  substitute,
-} from "@/lib/prompts/template";
+import { extractVariablesFromTexts } from "@/lib/prompts/template";
 import type { PromptMessage, PromptVersionDetail } from "@/lib/prompts/types";
 import { copyPromptRequest, projectsQuery } from "@/lib/queries/projects";
 import {
@@ -63,21 +59,9 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
     copyTargets[0]?.id ?? "",
   );
   const [error, setError] = useState<string | undefined>();
-  const [variableValues, setVariableValues] = useState<Record<string, string>>(
-    {},
-  );
   const variableNames = useMemo(
     () => extractVariablesFromTexts(messages.map((message) => message.content)),
     [messages],
-  );
-  const missing = missingVariables(variableNames, variableValues);
-  const previewMessages = useMemo(
-    () =>
-      messages.map((message) => ({
-        ...message,
-        content: substitute(message.content, filledValues(variableValues)),
-      })),
-    [messages, variableValues],
   );
 
   const save = useMutation({
@@ -123,7 +107,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
   const recordRun = useMutation({
     mutationFn: () =>
       recordRunRequest(promptId, {
-        variables: filledValues(variableValues),
+        variables: {},
         model,
       }),
     onSuccess: async () => {
@@ -305,15 +289,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
             {t("prompt.addMessage")}
           </button>
 
-          <PromptVariablesPanel
-            names={variableNames}
-            values={variableValues}
-            missing={missing}
-            previewMessages={previewMessages}
-            onChange={(name, value) =>
-              setVariableValues((current) => ({ ...current, [name]: value }))
-            }
-          />
+          <PromptVariableNames names={variableNames} />
 
           <label className="flex flex-col gap-2 text-sm">
             {t("prompt.historyNote")}
@@ -336,17 +312,13 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
             >
               {save.isPending ? t("prompt.saving") : t("prompt.saveVersion")}
             </button>
-            <button
-              className="rounded-md border border-[var(--line)] px-4 py-2 text-sm"
-              type="button"
+            <RunBusyButton
+              pending={recordRun.isPending}
               onClick={() => recordRun.mutate()}
-              disabled={recordRun.isPending}
-            >
-              {recordRun.isPending
-                ? t("prompt.recording")
-                : t("prompt.recordRun")}
-            </button>
+              variant="outline"
+            />
           </div>
+          <RunBusyStatus pending={recordRun.isPending} />
         </div>
       ) : null}
 
