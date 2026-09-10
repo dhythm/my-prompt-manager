@@ -78,7 +78,7 @@ describe("createCompleteChat", () => {
     const completeChat = createCompleteChat({ config: liveConfig, fetchImpl });
 
     await expect(
-      completeChat({ modelId: "gpt-5.6", messages }),
+      completeChat({ modelId: "gpt-5.6-sol", messages }),
     ).resolves.toEqual({
       text: "Hello from GPT",
       inputTokens: 11,
@@ -95,7 +95,7 @@ describe("createCompleteChat", () => {
       }),
     );
     expect(requestBody(fetchImpl)).toEqual({
-      model: "gpt-5.6",
+      model: "gpt-5.6-sol",
       messages,
     });
   });
@@ -201,7 +201,7 @@ describe("createCompleteChat", () => {
     const completeChat = createCompleteChat({ config: liveConfig, fetchImpl });
 
     await expect(
-      completeChat({ modelId: "gpt-5.6", messages }),
+      completeChat({ modelId: "gpt-5.6-sol", messages }),
     ).rejects.toSatisfy(
       (error) =>
         isLlmRequestError(error) &&

@@ -14,6 +14,14 @@ type Env = Record<string, string | undefined>;
 
 const DUMMY_SECRET = "dummy-auth-secret-not-for-production";
 
+export function dummyDemoResetAllowed(env: Env = process.env): boolean {
+  try {
+    return resolveAuthConfig(env).provider === "dummy";
+  } catch {
+    return false;
+  }
+}
+
 export function resolveAuthConfig(env: Env): AuthConfig {
   const provider = resolveProvider(env);
 

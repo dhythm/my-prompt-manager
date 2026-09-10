@@ -21,10 +21,10 @@ export const promptModels = [
     outputUsdPerMillion: 6,
   },
   {
-    id: "gpt-5.6",
-    label: "GPT-5.6",
+    id: "gpt-5.6-sol",
+    label: "GPT-5.6 Sol",
     provider: "openai",
-    apiModel: "gpt-5.6",
+    apiModel: "gpt-5.6-sol",
     inputUsdPerMillion: 4,
     outputUsdPerMillion: 20,
   },
@@ -60,6 +60,14 @@ export function promptModelForId(id: string): PromptModelId {
 }
 
 const legacyModels: PromptModel[] = [
+  {
+    id: "gpt-5.6",
+    label: "GPT-5.6 Sol",
+    provider: "openai",
+    apiModel: "gpt-5.6-sol",
+    inputUsdPerMillion: 4,
+    outputUsdPerMillion: 20,
+  },
   { id: "gpt-4.1", label: "GPT-4.1", provider: "openai", apiModel: "gpt-4.1" },
   {
     id: "claude-sonnet-4",

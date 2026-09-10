@@ -32,7 +32,7 @@ test("filters workspace logs by prompt and model", async ({ page }) => {
     page.getByRole("main").getByRole("link", { name: /Greeting/ }),
   ).toHaveCount(0);
 
-  await page.getByLabel("モデル").selectOption({ label: "GPT-5.6" });
+  await page.getByLabel("モデル").selectOption({ label: "GPT-5.6 Sol" });
   await expect(page.getByText("実行ログはまだありません")).toBeVisible();
 });
 

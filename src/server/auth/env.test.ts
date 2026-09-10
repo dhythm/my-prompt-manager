@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveAuthConfig } from "./env";
+import { dummyDemoResetAllowed, resolveAuthConfig } from "./env";
 
 describe("resolveAuthConfig", () => {
   it("defaults to dummy auth without Clerk keys", () => {
@@ -31,6 +31,17 @@ describe("resolveAuthConfig", () => {
       secret: "local-secret",
       autoSignIn: false,
     });
+  });
+
+  it("allows dummy demo reset only for dummy auth", () => {
+    expect(dummyDemoResetAllowed({})).toBe(true);
+    expect(
+      dummyDemoResetAllowed({
+        AUTH_PROVIDER: "clerk",
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_x",
+        CLERK_SECRET_KEY: "sk_test_x",
+      }),
+    ).toBe(false);
   });
 
   it("requires Clerk keys when AUTH_PROVIDER is clerk", () => {

@@ -38,7 +38,7 @@ export const samplePromptCatalog: SamplePrompt[] = [
   {
     id: "10000000-0000-4000-8000-000000000002",
     title: "PR差分をレビューする",
-    model: "gpt-5.6",
+    model: "gpt-5.6-sol",
     messages: [
       {
         role: "system",

@@ -15,10 +15,12 @@ describe("prompt models", () => {
     expect(defaultPromptModel).toBe("grok-4.6");
     expect(promptModels.map((model) => model.id)).toEqual([
       "grok-4.6",
-      "gpt-5.6",
+      "gpt-5.6-sol",
       "claude-sonnet-5",
       "gemini-3.1-pro",
     ]);
+    expect(promptModelLabel("gpt-5.6-sol")).toBe("GPT-5.6 Sol");
+    expect(promptModelLabel("gpt-5.6")).toBe("GPT-5.6 Sol");
   });
 
   it("spreads initial models across the catalog from the prompt id", () => {
@@ -57,7 +59,13 @@ describe("prompt models", () => {
       inputUsdPerMillion: 2,
       outputUsdPerMillion: 6,
     });
-    expect(getPromptModel("gpt-5.6")?.provider).toBe("openai");
+    expect(getPromptModel("gpt-5.6-sol")).toMatchObject({
+      provider: "openai",
+      apiModel: "gpt-5.6-sol",
+      inputUsdPerMillion: 4,
+      outputUsdPerMillion: 20,
+    });
+    expect(getPromptModel("gpt-5.6")?.apiModel).toBe("gpt-5.6-sol");
     expect(getPromptModel("claude-sonnet-5")?.provider).toBe("anthropic");
     expect(getPromptModel("gemini-3.1-pro")?.provider).toBe("google");
   });
