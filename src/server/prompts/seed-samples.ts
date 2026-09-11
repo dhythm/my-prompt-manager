@@ -1,6 +1,17 @@
 import { inArray, like, or } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
-import { promptMessages, prompts, promptVersions } from "@/server/db/schema";
+import { estimateCostUsd } from "@/lib/prompts/models";
+import {
+  dummyVariableValues,
+  extractVariablesFromTexts,
+  substitute,
+} from "@/lib/prompts/template";
+import {
+  promptMessages,
+  promptRuns,
+  prompts,
+  promptVersions,
+} from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import {
   deleteLeftoverFixtures,
@@ -59,6 +70,38 @@ export async function ensureSamplePrompts(db: AppDatabase, userId: string) {
         role: message.role,
         content: message.content,
         position,
+      })),
+    );
+
+    const values = dummyVariableValues(
+      extractVariablesFromTexts(
+        sample.messages.map((message) => message.content),
+      ),
+    );
+    const recordedInput = sample.messages
+      .map(
+        (message) => `${message.role}: ${substitute(message.content, values)}`,
+      )
+      .join("\n\n");
+    await db.insert(promptRuns).values(
+      sample.runs.map((run, runIndex) => ({
+        id: run.id,
+        promptId: sample.id,
+        versionId: version.id,
+        model: sample.model,
+        input: recordedInput,
+        output: run.output,
+        status: "succeeded",
+        inputTokens: run.inputTokens,
+        outputTokens: run.outputTokens,
+        costUsd: estimateCostUsd(
+          sample.model,
+          run.inputTokens,
+          run.outputTokens,
+        ),
+        source: run.source,
+        createdByUserId: userId,
+        createdAt: new Date(createdAt.getTime() - runIndex * 60_000),
       })),
     );
   }

@@ -8,6 +8,7 @@ import { createPgliteDatabase } from "@/server/db/pglite";
 import { listProjects } from "@/server/projects/repository";
 import { createTeam, listTeams } from "@/server/teams/repository";
 import { createPrompt, listPrompts } from "./repository";
+import { listWorkspaceRuns } from "./runs";
 import { samplePromptCatalog } from "./samples";
 import { ensureSamplePrompts } from "./seed-samples";
 import { getPromptDetail } from "./versions";
@@ -40,6 +41,34 @@ describe("sample prompts", () => {
       detail.messages.map((message) => message.content),
     );
     expect(variables.length).toBeGreaterThan(0);
+  });
+
+  it("seeds playground and api runs so logs are not empty", async () => {
+    const db = await openDatabase();
+    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+
+    const workspace = await listWorkspaceRuns(db, DUMMY_DEFAULT_USER_ID, {
+      limit: 50,
+    });
+    const expected = samplePromptCatalog.flatMap((sample) =>
+      sample.runs.map((run) => ({
+        id: run.id,
+        promptTitle: sample.title,
+        source: run.source,
+      })),
+    );
+    expect(workspace.runs).toHaveLength(expected.length);
+    expect(
+      workspace.runs.map((run) => ({
+        id: run.id,
+        promptTitle: run.promptTitle,
+        source: run.source,
+      })),
+    ).toEqual(expect.arrayContaining(expected));
+    expect(new Set(workspace.runs.map((run) => run.source))).toEqual(
+      new Set(["playground", "api"]),
+    );
   });
 
   it("is idempotent and removes leftover e2e titles", async () => {

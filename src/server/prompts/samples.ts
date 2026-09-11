@@ -1,11 +1,21 @@
 import type { PromptModelId } from "@/lib/prompts/models";
+import type { PromptRunSource } from "@/lib/prompts/types";
 import type { PromptMessageInput } from "./versions";
+
+export type SampleRun = {
+  id: string;
+  source: PromptRunSource;
+  output: string;
+  inputTokens: number;
+  outputTokens: number;
+};
 
 export type SamplePrompt = {
   id: string;
   title: string;
   model: PromptModelId;
   messages: PromptMessageInput[];
+  runs: SampleRun[];
 };
 
 export const samplePromptCatalog: SamplePrompt[] = [
@@ -34,6 +44,30 @@ export const samplePromptCatalog: SamplePrompt[] = [
         ].join("\n"),
       },
     ],
+    runs: [
+      {
+        id: "20000000-0000-4000-8000-000000000011",
+        source: "playground",
+        output: [
+          "Subject: Tuesday 10:00 JST delivery window",
+          "",
+          "The hardware is ready for Tuesday 10:00 JST. Please confirm that slot still works.",
+        ].join("\n"),
+        inputTokens: 186,
+        outputTokens: 42,
+      },
+      {
+        id: "20000000-0000-4000-8000-000000000012",
+        source: "api",
+        output: [
+          "Subject: Ready for Tuesday 10:00 JST",
+          "",
+          "Parts are packed for Tuesday 10:00 JST. Reply if you need a different window.",
+        ].join("\n"),
+        inputTokens: 192,
+        outputTokens: 38,
+      },
+    ],
   },
   {
     id: "10000000-0000-4000-8000-000000000002",
@@ -60,6 +94,30 @@ export const samplePromptCatalog: SamplePrompt[] = [
         ].join("\n"),
       },
     ],
+    runs: [
+      {
+        id: "20000000-0000-4000-8000-000000000021",
+        source: "playground",
+        output: [
+          'Blocker: parseId maps null to "unknown", so callers cannot tell a missing ID from a real value.',
+          "Should-fix: reject empty strings too.",
+          "Solid: the helper is local and easy to replace.",
+        ].join("\n"),
+        inputTokens: 214,
+        outputTokens: 61,
+      },
+      {
+        id: "20000000-0000-4000-8000-000000000022",
+        source: "api",
+        output: [
+          'Blocker: null becomes "unknown".',
+          "Should-fix: add a test for empty input.",
+          "Solid: small surface area.",
+        ].join("\n"),
+        inputTokens: 208,
+        outputTokens: 34,
+      },
+    ],
   },
   {
     id: "10000000-0000-4000-8000-000000000003",
@@ -81,6 +139,30 @@ export const samplePromptCatalog: SamplePrompt[] = [
         content: ["Meeting: {{meeting}}", "Notes:", "{{notes}}"].join("\n"),
       },
     ],
+    runs: [
+      {
+        id: "20000000-0000-4000-8000-000000000031",
+        source: "playground",
+        output: [
+          "Decisions: pricing page moves to Thursday.",
+          "Open: banner copy is undecided.",
+          "Tasks: Sam drafts pricing copy (unassigned due date).",
+        ].join("\n"),
+        inputTokens: 164,
+        outputTokens: 47,
+      },
+      {
+        id: "20000000-0000-4000-8000-000000000032",
+        source: "api",
+        output: [
+          "Decision: Thursday for the pricing page.",
+          "Question: banner — no owner.",
+          "Task: Sam / draft copy.",
+        ].join("\n"),
+        inputTokens: 170,
+        outputTokens: 31,
+      },
+    ],
   },
   {
     id: "10000000-0000-4000-8000-000000000004",
@@ -99,6 +181,30 @@ export const samplePromptCatalog: SamplePrompt[] = [
       {
         role: "user",
         content: ["Product: {{product}}", "Spec:", "{{spec}}"].join("\n"),
+      },
+    ],
+    runs: [
+      {
+        id: "20000000-0000-4000-8000-000000000041",
+        source: "playground",
+        output: [
+          "Ambiguity: can a guest unstar, or only star?",
+          "Missing path: what happens when a prompt is deleted while starred.",
+          'Metric: "appear first" needs a sort rule when many people star.',
+        ].join("\n"),
+        inputTokens: 198,
+        outputTokens: 58,
+      },
+      {
+        id: "20000000-0000-4000-8000-000000000042",
+        source: "api",
+        output: [
+          "Ask: is starring per-user or global?",
+          "Exception: anonymous quota.",
+          'Metric: time-to-first-starred-prompt is measurable; "appear first" is not.',
+        ].join("\n"),
+        inputTokens: 201,
+        outputTokens: 44,
       },
     ],
   },
