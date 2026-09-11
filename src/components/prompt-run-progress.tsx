@@ -12,7 +12,7 @@ export function RunBusyButton({
   const solid = variant === "solid";
   return (
     <button
-      className={`inline-flex items-center gap-2 self-start rounded-md px-4 py-2 text-sm ${
+      className={`inline-flex items-center gap-2 self-start rounded-md px-4 py-2 text-sm disabled:opacity-60 ${
         solid
           ? "bg-[var(--ink)] text-white"
           : "border border-[var(--line)] bg-white"
