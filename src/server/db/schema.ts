@@ -159,23 +159,33 @@ export const promptMessages = pgTable("prompt_messages", {
   position: integer().notNull(),
 });
 
-export const promptRuns = pgTable("prompt_runs", {
-  id: uuid().defaultRandom().primaryKey(),
-  promptId: uuid("prompt_id")
-    .notNull()
-    .references(() => prompts.id),
-  versionId: uuid("version_id")
-    .notNull()
-    .references(() => promptVersions.id),
-  model: text().notNull(),
-  input: text().notNull(),
-  output: text().notNull(),
-  status: text().notNull(),
-  inputTokens: integer("input_tokens"),
-  outputTokens: integer("output_tokens"),
-  costUsd: numeric("cost_usd", { precision: 16, scale: 10 }),
-  createdByUserId: uuid("created_by_user_id").references(() => users.id),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const promptRuns = pgTable(
+  "prompt_runs",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    promptId: uuid("prompt_id")
+      .notNull()
+      .references(() => prompts.id),
+    versionId: uuid("version_id")
+      .notNull()
+      .references(() => promptVersions.id),
+    model: text().notNull(),
+    input: text().notNull(),
+    output: text().notNull(),
+    status: text().notNull(),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    costUsd: numeric("cost_usd", { precision: 16, scale: 10 }),
+    source: text().notNull().default("editor"),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "prompt_run_source",
+      sql`${table.source} in ('playground', 'editor', 'api')`,
+    ),
+  ],
+);

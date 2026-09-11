@@ -53,6 +53,7 @@ describe("prompt runs", () => {
     expect(run.inputTokens).toBe(12);
     expect(run.outputTokens).toBe(34);
     expect(run.costUsd).toBe(estimateCostUsd(model, 12, 34));
+    expect(run.source).toBe("editor");
 
     const logs = await listPromptRuns(db, agentId, prompt.id);
     expect(logs.runs).toHaveLength(1);
@@ -92,12 +93,30 @@ describe("prompt runs", () => {
     });
 
     expect(run.input).toBe("system: You help Ada.\n\nuser: Talk about math.");
+    expect(run.source).toBe("editor");
 
     const detail = await getPromptDetail(db, agentId, prompt.id);
     expect(detail.messages.map((message) => message.content)).toEqual([
       "You help {{name}}.",
       "Talk about {{topic}}.",
     ]);
+  });
+
+  it("records playground as the run source", async () => {
+    const db = await openDatabase();
+    const prompt = await createPrompt(db, agentId, {
+      title: "Greeting",
+      body: "Say hello",
+    });
+
+    const run = await createPromptRun(db, agentId, prompt.id, {
+      source: "playground",
+      completeChat: stubCompleteChat,
+    });
+    expect(run.source).toBe("playground");
+
+    const logs = await listPromptRuns(db, agentId, prompt.id);
+    expect(logs.runs[0]?.source).toBe("playground");
   });
 
   it("leaves unknown placeholders in the recorded input", async () => {

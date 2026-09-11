@@ -1,3 +1,4 @@
+import type { PromptRunSource } from "@/lib/prompts/types";
 import { t } from "./t";
 
 export function messageRoleLabel(
@@ -20,4 +21,14 @@ export function teamRoleLabel(role: string): string {
     return t("team.roleMember");
   }
   return role;
+}
+
+export function runSourceLabel(source: PromptRunSource): string {
+  if (source === "playground") {
+    return t("prompt.runSourcePlayground");
+  }
+  if (source === "editor") {
+    return t("prompt.runSourceEditor");
+  }
+  return t("prompt.runSourceApi");
 }

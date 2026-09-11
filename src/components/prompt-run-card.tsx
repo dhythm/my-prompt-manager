@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { runSourceLabel } from "@/lib/i18n/labels";
 import { t } from "@/lib/i18n/t";
 import { formatCostUsd, promptModelLabel } from "@/lib/prompts/models";
 import type { PromptRun } from "@/lib/prompts/types";
@@ -111,6 +112,7 @@ function runMeta(run: PromptRun, model?: string, recordedAt?: string): string {
   const cost = formatCostUsd(run.costUsd);
   return [
     recordedAt,
+    runSourceLabel(run.source),
     model,
     run.status === "failed" ? t("prompt.runFailed") : undefined,
     tokens,

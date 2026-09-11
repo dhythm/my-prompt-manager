@@ -18,6 +18,7 @@ import type { PromptMessage, PromptRun } from "@/lib/prompts/types";
 import {
   promptRunsQuery,
   recordRunRequest,
+  rememberRecordedRun,
   workspaceRunsQuery,
 } from "@/lib/queries/prompt-detail";
 
@@ -60,15 +61,21 @@ export function PromptPlayground({
       recordRunRequest(promptId, {
         variables: runValues,
         model,
+        source: "playground",
       }),
     onSuccess: async (created) => {
       setError(undefined);
       setResult(created);
+      rememberRecordedRun(queryClient, created);
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: promptRunsQuery.key(promptId),
+          refetchType: "all",
         }),
-        queryClient.invalidateQueries({ queryKey: workspaceRunsQuery.key }),
+        queryClient.invalidateQueries({
+          queryKey: workspaceRunsQuery.key,
+          refetchType: "all",
+        }),
       ]);
     },
     onError: (err) => {

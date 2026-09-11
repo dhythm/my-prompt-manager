@@ -1,0 +1,2 @@
+ALTER TABLE "prompt_runs" ADD COLUMN "source" text DEFAULT 'editor' NOT NULL;--> statement-breakpoint
+ALTER TABLE "prompt_runs" ADD CONSTRAINT "prompt_run_source" CHECK ("source" in ('playground', 'editor', 'api'));

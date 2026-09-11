@@ -45,6 +45,8 @@ export type PromptVersionDetail = {
   messages: PromptMessage[];
 };
 
+export type PromptRunSource = "playground" | "editor" | "api";
+
 export type PromptRun = {
   id: string;
   promptId: string;
@@ -56,5 +58,6 @@ export type PromptRun = {
   inputTokens: number | null;
   outputTokens: number | null;
   costUsd: string | null;
+  source: PromptRunSource;
   createdAt: string;
 };

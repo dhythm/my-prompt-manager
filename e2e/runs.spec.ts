@@ -29,6 +29,9 @@ test("filters workspace logs by prompt and model", async ({ page }) => {
     page.getByRole("main").getByRole("link", { name: title }),
   ).toBeVisible();
   await expect(
+    page.getByRole("main").getByRole("link", { name: /編集/ }),
+  ).toBeVisible();
+  await expect(
     page.getByRole("main").getByRole("link", { name: /Greeting/ }),
   ).toHaveCount(0);
 

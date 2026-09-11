@@ -50,6 +50,7 @@ describe("serializeRun", () => {
         inputTokens: 12,
         outputTokens: 34,
         costUsd: "0.0002280000",
+        source: "playground",
         createdAt: new Date("2026-01-02T03:04:05.000Z"),
       }),
     ).toEqual({
@@ -63,6 +64,7 @@ describe("serializeRun", () => {
       inputTokens: 12,
       outputTokens: 34,
       costUsd: "0.0002280000",
+      source: "playground",
       createdAt: "2026-01-02T03:04:05.000Z",
     });
   });

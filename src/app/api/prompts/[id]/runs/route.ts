@@ -46,9 +46,15 @@ export async function POST(
     }
 
     const { id } = await context.params;
-    const { variables, model } = parseRecordRunInput(await request.json());
+    const { variables, model, source } = parseRecordRunInput(
+      await request.json(),
+    );
     const db = await getDb();
-    const run = await createPromptRun(db, user.id, id, { variables, model });
+    const run = await createPromptRun(db, user.id, id, {
+      variables,
+      model,
+      source,
+    });
     return NextResponse.json({ run: serializeRun(run) }, { status: 201 });
   } catch (error) {
     return errorResponse(error, t("error.runRecordFailed"));

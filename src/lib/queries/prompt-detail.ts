@@ -1,4 +1,9 @@
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  infiniteQueryOptions,
+  type QueryClient,
+  queryOptions,
+} from "@tanstack/react-query";
 import { getJson, patchJson, postJson } from "@/lib/api/http";
 import { RUNS_PAGE_SIZE } from "@/lib/prompts/runs-page";
 import type {
@@ -134,11 +139,74 @@ export async function recordRunRequest(
   input: {
     variables?: Record<string, string>;
     model?: string;
+    source?: PromptRun["source"];
   } = {},
 ) {
   const data = await postJson<{ run: PromptRun }>(`/api/prompts/${id}/runs`, {
     variables: input.variables ?? {},
     ...(input.model ? { model: input.model } : {}),
+    ...(input.source ? { source: input.source } : {}),
   });
   return data.run;
+}
+
+export function prependRunToPages(
+  data: InfiniteData<RunsPage> | undefined,
+  run: PromptRun,
+): InfiniteData<RunsPage> | undefined {
+  if (!data?.pages.length) {
+    return data;
+  }
+  const [first, ...rest] = data.pages;
+  if (first.runs.some((item) => item.id === run.id)) {
+    return data;
+  }
+  return {
+    pages: [{ ...first, runs: [run, ...first.runs] }, ...rest],
+    pageParams: data.pageParams,
+  };
+}
+
+function workspaceRunCacheIncludes(queryKey: unknown, run: PromptRun) {
+  if (!Array.isArray(queryKey) || queryKey[0] !== "runs") {
+    return false;
+  }
+  const filteredPromptId = queryKey[1];
+  const filteredModel = queryKey[2];
+  if (
+    typeof filteredPromptId === "string" &&
+    filteredPromptId !== "" &&
+    filteredPromptId !== run.promptId
+  ) {
+    return false;
+  }
+  if (
+    typeof filteredModel === "string" &&
+    filteredModel !== "" &&
+    filteredModel !== run.model
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export function rememberRecordedRun(queryClient: QueryClient, run: PromptRun) {
+  queryClient.setQueryData(runDetailQuery.key(run.id), run);
+  queryClient.setQueryData(
+    promptRunsQuery.key(run.promptId),
+    (current: InfiniteData<RunsPage> | undefined) =>
+      prependRunToPages(current, run),
+  );
+  for (const query of queryClient
+    .getQueryCache()
+    .findAll({ queryKey: workspaceRunsQuery.key })) {
+    if (!workspaceRunCacheIncludes(query.queryKey, run)) {
+      continue;
+    }
+    queryClient.setQueryData(
+      query.queryKey,
+      (current: InfiniteData<RunsPage> | undefined) =>
+        prependRunToPages(current, run),
+    );
+  }
 }

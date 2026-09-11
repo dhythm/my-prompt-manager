@@ -3,6 +3,7 @@ import { t } from "@/lib/i18n/t";
 import { estimateCostUsd } from "@/lib/prompts/models";
 import { RUNS_PAGE_SIZE } from "@/lib/prompts/runs-page";
 import { substitute } from "@/lib/prompts/template";
+import type { PromptRunSource } from "@/lib/prompts/types";
 import { promptRuns, prompts } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
 import { createNotFoundError } from "@/server/errors";
@@ -20,6 +21,7 @@ import { getPromptDetail } from "./versions";
 export type CreatePromptRunInput = {
   variables?: Record<string, string>;
   model?: string;
+  source?: PromptRunSource;
   completeChat?: CompleteChat;
 };
 
@@ -43,6 +45,7 @@ export type ListedRuns = {
     inputTokens: number | null;
     outputTokens: number | null;
     costUsd: string | null;
+    source: string;
     createdByUserId: string | null;
     createdAt: Date;
   }>;
@@ -61,6 +64,7 @@ const runColumns = {
   inputTokens: promptRuns.inputTokens,
   outputTokens: promptRuns.outputTokens,
   costUsd: promptRuns.costUsd,
+  source: promptRuns.source,
   createdByUserId: promptRuns.createdByUserId,
   createdAt: promptRuns.createdAt,
 };
@@ -122,6 +126,7 @@ export async function createPromptRun(
       inputTokens,
       outputTokens,
       costUsd,
+      source: input.source ?? "editor",
       createdByUserId: userId,
     })
     .returning();

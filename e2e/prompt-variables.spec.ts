@@ -37,9 +37,15 @@ test("fills variables, previews expansion, and records expanded run input", asyn
   await page.getByRole("textbox", { name: "name" }).fill("Ada");
   await page.getByRole("button", { name: "実行" }).click();
   await expect(page.getByLabel("プレビュー")).toContainText("Hello Ada");
-  await expect(page.getByLabel("出力")).toBeVisible();
+  await expect(page.getByLabel("出力")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByRole("article").getByText(/^system:/)).toHaveCount(0);
   await expect(page.getByText("{{name}}")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "ログ", exact: true }).click();
+  const log = page.getByRole("link", { name: /プレイグラウンド/ }).first();
+  await expect(log).toBeVisible();
+  await log.click();
+  await expect(page.getByText("Hello Ada")).toBeVisible();
 });
 
 test("shows a running status while the playground executes", async ({

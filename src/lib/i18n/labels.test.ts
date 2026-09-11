@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { messageRoleLabel, teamRoleLabel } from "./labels";
+import { messageRoleLabel, runSourceLabel, teamRoleLabel } from "./labels";
 
 describe("labels", () => {
   it("maps message roles to Japanese", () => {
@@ -11,5 +11,11 @@ describe("labels", () => {
   it("maps team roles to Japanese", () => {
     expect(teamRoleLabel("owner")).toBe("オーナー");
     expect(teamRoleLabel("member")).toBe("メンバー");
+  });
+
+  it("maps run sources to Japanese", () => {
+    expect(runSourceLabel("playground")).toBe("プレイグラウンド");
+    expect(runSourceLabel("editor")).toBe("編集");
+    expect(runSourceLabel("api")).toBe("API");
   });
 });

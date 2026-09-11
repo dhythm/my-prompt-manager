@@ -77,8 +77,14 @@ describe("parseCreatePromptInput", () => {
 
 describe("parseRecordRunInput", () => {
   it("defaults to an empty variable map", () => {
-    expect(parseRecordRunInput({})).toEqual({ variables: {} });
-    expect(parseRecordRunInput(undefined)).toEqual({ variables: {} });
+    expect(parseRecordRunInput({})).toEqual({
+      variables: {},
+      source: "editor",
+    });
+    expect(parseRecordRunInput(undefined)).toEqual({
+      variables: {},
+      source: "editor",
+    });
   });
 
   it("accepts string variable values", () => {
@@ -86,6 +92,7 @@ describe("parseRecordRunInput", () => {
       parseRecordRunInput({ variables: { name: "Ada", topic: "math" } }),
     ).toEqual({
       variables: { name: "Ada", topic: "math" },
+      source: "editor",
     });
   });
 
@@ -111,6 +118,7 @@ describe("parseRecordRunInput", () => {
     expect(parseRecordRunInput({ model: "gpt-5.6" })).toEqual({
       variables: {},
       model: "gpt-5.6",
+      source: "editor",
     });
     expect(
       parseRecordRunInput({
@@ -120,7 +128,32 @@ describe("parseRecordRunInput", () => {
     ).toEqual({
       variables: { name: "Ada" },
       model: "grok-4.6",
+      source: "editor",
     });
+  });
+
+  it("defaults source to editor and accepts playground", () => {
+    expect(parseRecordRunInput({})).toEqual({
+      variables: {},
+      source: "editor",
+    });
+    expect(parseRecordRunInput({ source: "playground" })).toEqual({
+      variables: {},
+      source: "playground",
+    });
+    expect(parseRecordRunInput({ source: "editor" })).toEqual({
+      variables: {},
+      source: "editor",
+    });
+  });
+
+  it("rejects api and unknown sources on the session run route", () => {
+    expect(() => parseRecordRunInput({ source: "api" })).toThrowError(
+      t("validation.runSourceInvalid"),
+    );
+    expect(() => parseRecordRunInput({ source: "sdk" })).toThrowError(
+      t("validation.runSourceInvalid"),
+    );
   });
 });
 

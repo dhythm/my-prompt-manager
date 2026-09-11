@@ -27,6 +27,7 @@ import {
   promptRunsQuery,
   promptVersionsQuery,
   recordRunRequest,
+  rememberRecordedRun,
   savePromptRequest,
   workspaceRunsQuery,
 } from "@/lib/queries/prompt-detail";
@@ -109,14 +110,20 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       recordRunRequest(promptId, {
         variables: {},
         model,
+        source: "editor",
       }),
-    onSuccess: async () => {
+    onSuccess: async (created) => {
       setError(undefined);
+      rememberRecordedRun(queryClient, created);
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: promptRunsQuery.key(promptId),
+          refetchType: "all",
         }),
-        queryClient.invalidateQueries({ queryKey: workspaceRunsQuery.key }),
+        queryClient.invalidateQueries({
+          queryKey: workspaceRunsQuery.key,
+          refetchType: "all",
+        }),
       ]);
     },
     onError: (err) => {

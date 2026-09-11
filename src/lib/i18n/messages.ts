@@ -57,6 +57,9 @@ export const messages = {
     preview: "プレビュー",
     runInput: "入力",
     emptyRuns: "実行ログはまだありません",
+    runSourcePlayground: "プレイグラウンド",
+    runSourceEditor: "編集",
+    runSourceApi: "API",
     compareFrom: "比較元",
     compareTo: "比較先",
     noPreviousVersion: "最初のバージョンです",
@@ -146,6 +149,7 @@ export const messages = {
     variableValueMustBeString: "変数 {name} の値は文字列である必要があります",
     variableValueMax: "変数 {name} の値は{max}文字以内にしてください",
     cursorInvalid: "続きの指定が不正です",
+    runSourceInvalid: "実行元の指定が不正です",
   },
   error: {
     responseJson: "応答が正しいJSONではありません",

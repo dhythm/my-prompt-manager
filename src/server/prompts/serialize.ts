@@ -3,6 +3,7 @@ import type {
   Prompt,
   PromptMessage,
   PromptRun,
+  PromptRunSource,
   PromptVersion,
 } from "@/lib/prompts/types";
 
@@ -75,6 +76,7 @@ export function serializeRun(run: {
   inputTokens: number | null;
   outputTokens: number | null;
   costUsd: string | null;
+  source: string;
   createdAt: Date;
 }): PromptRun {
   return {
@@ -88,6 +90,7 @@ export function serializeRun(run: {
     inputTokens: run.inputTokens,
     outputTokens: run.outputTokens,
     costUsd: run.costUsd,
+    source: run.source as PromptRunSource,
     createdAt: run.createdAt.toISOString(),
   };
 }
