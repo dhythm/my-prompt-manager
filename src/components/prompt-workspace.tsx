@@ -110,7 +110,7 @@ export function PromptWorkspace({ promptId }: { promptId: string }) {
       recordRunRequest(promptId, {
         variables: {},
         model,
-        source: "editor",
+        source: "playground",
       }),
     onSuccess: async (created) => {
       setError(undefined);

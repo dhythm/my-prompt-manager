@@ -126,7 +126,7 @@ export async function createPromptRun(
       inputTokens,
       outputTokens,
       costUsd,
-      source: input.source ?? "editor",
+      source: input.source ?? "playground",
       createdByUserId: userId,
     })
     .returning();

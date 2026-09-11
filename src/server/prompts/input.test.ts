@@ -79,11 +79,11 @@ describe("parseRecordRunInput", () => {
   it("defaults to an empty variable map", () => {
     expect(parseRecordRunInput({})).toEqual({
       variables: {},
-      source: "editor",
+      source: "playground",
     });
     expect(parseRecordRunInput(undefined)).toEqual({
       variables: {},
-      source: "editor",
+      source: "playground",
     });
   });
 
@@ -92,7 +92,7 @@ describe("parseRecordRunInput", () => {
       parseRecordRunInput({ variables: { name: "Ada", topic: "math" } }),
     ).toEqual({
       variables: { name: "Ada", topic: "math" },
-      source: "editor",
+      source: "playground",
     });
   });
 
@@ -118,7 +118,7 @@ describe("parseRecordRunInput", () => {
     expect(parseRecordRunInput({ model: "gpt-5.6" })).toEqual({
       variables: {},
       model: "gpt-5.6",
-      source: "editor",
+      source: "playground",
     });
     expect(
       parseRecordRunInput({
@@ -128,27 +128,26 @@ describe("parseRecordRunInput", () => {
     ).toEqual({
       variables: { name: "Ada" },
       model: "grok-4.6",
-      source: "editor",
+      source: "playground",
     });
   });
 
-  it("defaults source to editor and accepts playground", () => {
+  it("defaults source to playground", () => {
     expect(parseRecordRunInput({})).toEqual({
       variables: {},
-      source: "editor",
+      source: "playground",
     });
     expect(parseRecordRunInput({ source: "playground" })).toEqual({
       variables: {},
       source: "playground",
     });
-    expect(parseRecordRunInput({ source: "editor" })).toEqual({
-      variables: {},
-      source: "editor",
-    });
   });
 
-  it("rejects api and unknown sources on the session run route", () => {
+  it("rejects api, editor, and unknown sources on the session run route", () => {
     expect(() => parseRecordRunInput({ source: "api" })).toThrowError(
+      t("validation.runSourceInvalid"),
+    );
+    expect(() => parseRecordRunInput({ source: "editor" })).toThrowError(
       t("validation.runSourceInvalid"),
     );
     expect(() => parseRecordRunInput({ source: "sdk" })).toThrowError(

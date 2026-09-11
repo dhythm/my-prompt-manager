@@ -27,8 +27,5 @@ export function runSourceLabel(source: PromptRunSource): string {
   if (source === "playground") {
     return t("prompt.runSourcePlayground");
   }
-  if (source === "editor") {
-    return t("prompt.runSourceEditor");
-  }
   return t("prompt.runSourceApi");
 }

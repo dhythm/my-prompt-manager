@@ -58,7 +58,6 @@ export const messages = {
     runInput: "入力",
     emptyRuns: "実行ログはまだありません",
     runSourcePlayground: "プレイグラウンド",
-    runSourceEditor: "編集",
     runSourceApi: "API",
     compareFrom: "比較元",
     compareTo: "比較先",

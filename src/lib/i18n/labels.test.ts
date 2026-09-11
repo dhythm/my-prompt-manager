@@ -15,7 +15,6 @@ describe("labels", () => {
 
   it("maps run sources to Japanese", () => {
     expect(runSourceLabel("playground")).toBe("プレイグラウンド");
-    expect(runSourceLabel("editor")).toBe("編集");
     expect(runSourceLabel("api")).toBe("API");
   });
 });

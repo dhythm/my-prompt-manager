@@ -3,7 +3,7 @@ import { type TranslationKey, t } from "@/lib/i18n/t";
 import { RUNS_PAGE_SIZE, RUNS_PAGE_SIZE_MAX } from "@/lib/prompts/runs-page";
 import type { CreatePromptInput } from "@/lib/prompts/types";
 
-const UI_RUN_SOURCES = new Set(["playground", "editor"]);
+const UI_RUN_SOURCES = new Set(["playground"]);
 
 export type { CreatePromptInput };
 
@@ -28,10 +28,10 @@ const VARIABLE_VALUE_MAX_LENGTH = 10_000;
 export function parseRecordRunInput(value: unknown): {
   variables: Record<string, string>;
   model?: string;
-  source: "playground" | "editor";
+  source: "playground";
 } {
   if (value === undefined || value === null) {
-    return { variables: {}, source: "editor" };
+    return { variables: {}, source: "playground" };
   }
   const record = asObject(value);
   const model =
@@ -46,14 +46,14 @@ export function parseRecordRunInput(value: unknown): {
   };
 }
 
-function parseUiRunSource(value: unknown): "playground" | "editor" {
+function parseUiRunSource(value: unknown): "playground" {
   if (value === undefined || value === null || value === "") {
-    return "editor";
+    return "playground";
   }
   if (typeof value !== "string" || !UI_RUN_SOURCES.has(value)) {
     throw createValidationError(t("validation.runSourceInvalid"));
   }
-  return value as "playground" | "editor";
+  return "playground";
 }
 
 function parseVariables(value: unknown): Record<string, string> {

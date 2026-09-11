@@ -53,7 +53,7 @@ describe("prompt runs", () => {
     expect(run.inputTokens).toBe(12);
     expect(run.outputTokens).toBe(34);
     expect(run.costUsd).toBe(estimateCostUsd(model, 12, 34));
-    expect(run.source).toBe("editor");
+    expect(run.source).toBe("playground");
 
     const logs = await listPromptRuns(db, agentId, prompt.id);
     expect(logs.runs).toHaveLength(1);
@@ -93,7 +93,7 @@ describe("prompt runs", () => {
     });
 
     expect(run.input).toBe("system: You help Ada.\n\nuser: Talk about math.");
-    expect(run.source).toBe("editor");
+    expect(run.source).toBe("playground");
 
     const detail = await getPromptDetail(db, agentId, prompt.id);
     expect(detail.messages.map((message) => message.content)).toEqual([

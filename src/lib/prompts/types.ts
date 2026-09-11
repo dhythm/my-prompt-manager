@@ -45,7 +45,7 @@ export type PromptVersionDetail = {
   messages: PromptMessage[];
 };
 
-export type PromptRunSource = "playground" | "editor" | "api";
+export type PromptRunSource = "playground" | "api";
 
 export type PromptRun = {
   id: string;
