@@ -104,6 +104,7 @@ fad research, exploration, and parallel analysis to subagents
 - use `pnpm` as a package manager
 - use `vitest` for testing
 - default database is PGlite at `.data/pglite` (no Docker / DATABASE_URL required)
+- dummy auth + PGlite seeds sample prompts and runs so local/agent checks start from a known catalog; Postgres (Neon, Supabase, Docker) does not seed
 - set `DATABASE_URL` (postgres/postgresql) to use PostgreSQL, Neon, or Supabase
 - client-to-server reads go through Route Handlers and TanStack Query; do not use Server Actions as `queryFn`
 - take UI screenshots with Playwright (`pnpm screenshot`) or agent-browser; first time run `pnpm browser:install`

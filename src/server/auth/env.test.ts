@@ -33,13 +33,18 @@ describe("resolveAuthConfig", () => {
     });
   });
 
-  it("allows dummy demo reset only for dummy auth", () => {
+  it("allows dummy demo reset only on PGlite with dummy auth", () => {
     expect(dummyDemoResetAllowed({})).toBe(true);
     expect(
       dummyDemoResetAllowed({
         AUTH_PROVIDER: "clerk",
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_x",
         CLERK_SECRET_KEY: "sk_test_x",
+      }),
+    ).toBe(false);
+    expect(
+      dummyDemoResetAllowed({
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
       }),
     ).toBe(false);
   });

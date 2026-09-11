@@ -1,3 +1,5 @@
+import { resolveDatabaseConfig } from "@/server/db/env";
+
 export type AuthConfig =
   | {
       provider: "dummy";
@@ -16,7 +18,10 @@ const DUMMY_SECRET = "dummy-auth-secret-not-for-production";
 
 export function dummyDemoResetAllowed(env: Env = process.env): boolean {
   try {
-    return resolveAuthConfig(env).provider === "dummy";
+    return (
+      resolveAuthConfig(env).provider === "dummy" &&
+      resolveDatabaseConfig(env).driver === "pglite"
+    );
   } catch {
     return false;
   }
