@@ -5,12 +5,10 @@ import {
   ensureDummyUsers,
 } from "@/server/auth/dummy/users";
 import { createPgliteDatabase } from "@/server/db/pglite";
-import { listProjects } from "@/server/projects/repository";
-import { createTeam, listTeams } from "@/server/teams/repository";
-import { createPrompt, listPrompts } from "./repository";
+import { resetAndSeed } from "@/server/dummy/reset";
+import { listPrompts } from "./repository";
 import { listWorkspaceRuns } from "./runs";
 import { samplePromptCatalog } from "./samples";
-import { ensureSamplePrompts } from "./seed-samples";
 import { getPromptDetail } from "./versions";
 
 describe("sample prompts", () => {
@@ -22,7 +20,7 @@ describe("sample prompts", () => {
 
   it("seeds a small playground catalog for the dummy user", async () => {
     const db = await openDatabase();
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+    await resetAndSeed(db, DUMMY_DEFAULT_USER_ID);
 
     const listed = await listPrompts(db, DUMMY_DEFAULT_USER_ID);
     expect(listed.map((prompt) => prompt.title)).toEqual(
@@ -45,8 +43,8 @@ describe("sample prompts", () => {
 
   it("seeds playground and api runs so logs are not empty", async () => {
     const db = await openDatabase();
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+    await resetAndSeed(db, DUMMY_DEFAULT_USER_ID);
+    await resetAndSeed(db, DUMMY_DEFAULT_USER_ID);
 
     const workspace = await listWorkspaceRuns(db, DUMMY_DEFAULT_USER_ID, {
       limit: 50,
@@ -69,42 +67,6 @@ describe("sample prompts", () => {
     expect(new Set(workspace.runs.map((run) => run.source))).toEqual(
       new Set(["playground", "api"]),
     );
-  });
-
-  it("is idempotent and removes leftover e2e titles", async () => {
-    const db = await openDatabase();
-    await createPrompt(db, DUMMY_DEFAULT_USER_ID, {
-      title: "Greeting",
-      body: "Say hello",
-    });
-    await createPrompt(db, DUMMY_DEFAULT_USER_ID, {
-      title: "無題",
-      body: "",
-    });
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
-
-    const listed = await listPrompts(db, DUMMY_DEFAULT_USER_ID);
-    expect(listed).toHaveLength(samplePromptCatalog.length);
-    expect(listed.map((prompt) => prompt.title)).not.toContain("Greeting");
-    expect(listed.map((prompt) => prompt.title)).not.toContain("無題");
-  });
-
-  it("removes leftover e2e workspaces", async () => {
-    const db = await openDatabase();
-    const team = await createTeam(db, DUMMY_DEFAULT_USER_ID, {
-      name: "Core 1788952250858",
-    });
-    await createPrompt(db, DUMMY_DEFAULT_USER_ID, {
-      title: "Team leftover",
-      body: "gone",
-      teamId: team.id,
-    });
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
-
-    await expect(listTeams(db, DUMMY_DEFAULT_USER_ID)).resolves.toEqual([]);
-    const projects = await listProjects(db, DUMMY_DEFAULT_USER_ID);
-    expect(projects.every((project) => project.teamId === null)).toBe(true);
   });
 
   async function openDatabase() {

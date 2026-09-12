@@ -209,15 +209,3 @@ export const samplePromptCatalog: SamplePrompt[] = [
     ],
   },
 ];
-
-export const samplePromptIds = samplePromptCatalog.map((sample) => sample.id);
-
-export const leftoverPromptTitles = [
-  "無題",
-  "Greeting",
-  "Variable greeting",
-  "Quality check",
-  "Standup",
-  "aaa",
-  "Persisted prompt",
-];

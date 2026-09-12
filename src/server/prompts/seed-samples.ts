@@ -1,4 +1,3 @@
-import { inArray, like, or } from "drizzle-orm";
 import { t } from "@/lib/i18n/t";
 import { estimateCostUsd } from "@/lib/prompts/models";
 import {
@@ -13,16 +12,8 @@ import {
   promptVersions,
 } from "@/server/db/schema";
 import type { AppDatabase } from "@/server/db/types";
-import {
-  deleteLeftoverFixtures,
-  deletePromptGraph,
-} from "@/server/dummy/cleanup";
 import { ensureDefaultProjectForOwnership } from "@/server/projects/repository";
-import {
-  leftoverPromptTitles,
-  samplePromptCatalog,
-  samplePromptIds,
-} from "./samples";
+import { samplePromptCatalog } from "./samples";
 
 export async function ensureSamplePrompts(db: AppDatabase, userId: string) {
   const project = await ensureDefaultProjectForOwnership(db, {
@@ -31,11 +22,7 @@ export async function ensureSamplePrompts(db: AppDatabase, userId: string) {
     createdByUserId: userId,
   });
 
-  await deleteLeftoverFixtures(db);
-  await deletePromptGraph(db, await leftoverPromptIds(db));
-
   for (const [index, sample] of samplePromptCatalog.entries()) {
-    await deletePromptGraph(db, [sample.id]);
     const createdAt = new Date(Date.now() - index * 1000);
     await db.insert(prompts).values({
       id: sample.id,
@@ -105,22 +92,6 @@ export async function ensureSamplePrompts(db: AppDatabase, userId: string) {
       })),
     );
   }
-}
-
-async function leftoverPromptIds(db: AppDatabase) {
-  const leftover = await db
-    .select({ id: prompts.id })
-    .from(prompts)
-    .where(
-      or(
-        inArray(prompts.title, leftoverPromptTitles),
-        like(prompts.title, "Filter %"),
-      ),
-    );
-
-  return leftover
-    .map((row) => row.id)
-    .filter((id) => !samplePromptIds.includes(id));
 }
 
 function previewFromMessages(
