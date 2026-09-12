@@ -36,3 +36,16 @@ export async function resetAndSeed(
     await ensureSamplePrompts(tx, userId);
   });
 }
+
+export async function seedIfEmpty(
+  db: AppDatabase,
+  userId: string = DUMMY_DEFAULT_USER_ID,
+) {
+  const existing = await db.select({ id: prompts.id }).from(prompts).limit(1);
+  if (existing.length > 0) {
+    return { seeded: false as const };
+  }
+  await ensureDummyUsers(db);
+  await ensureSamplePrompts(db, userId);
+  return { seeded: true as const };
+}

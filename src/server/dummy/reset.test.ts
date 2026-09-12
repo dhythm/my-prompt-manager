@@ -10,7 +10,7 @@ import { createPrompt, listPrompts } from "@/server/prompts/repository";
 import { listWorkspaceRuns } from "@/server/prompts/runs";
 import { samplePromptCatalog } from "@/server/prompts/samples";
 import { createTeam, listTeams } from "@/server/teams/repository";
-import { resetAndSeed } from "./reset";
+import { resetAndSeed, seedIfEmpty } from "./reset";
 
 describe("resetAndSeed", () => {
   const databases: Array<{ close: () => Promise<void> }> = [];
@@ -64,6 +64,32 @@ describe("resetAndSeed", () => {
         .flatMap((sample) => sample.runs.map((run) => run.id))
         .sort(),
     );
+  });
+
+  it("inserts the catalog when prompts are empty", async () => {
+    const db = await openDatabase();
+    const result = await seedIfEmpty(db, DUMMY_DEFAULT_USER_ID);
+    expect(result).toEqual({ seeded: true });
+    const listed = await listPrompts(db, DUMMY_DEFAULT_USER_ID);
+    expect(listed.map((prompt) => prompt.id)).toEqual(
+      samplePromptCatalog.map((sample) => sample.id),
+    );
+  });
+
+  it("does not write when any prompt exists", async () => {
+    const db = await openDatabase();
+    const created = await createPrompt(db, DUMMY_DEFAULT_USER_ID, {
+      title: "Keep me",
+      body: "existing work",
+    });
+
+    const result = await seedIfEmpty(db, DUMMY_DEFAULT_USER_ID);
+    expect(result).toEqual({ seeded: false });
+
+    const listed = await listPrompts(db, DUMMY_DEFAULT_USER_ID);
+    expect(listed).toHaveLength(1);
+    expect(listed[0].id).toBe(created.id);
+    expect(listed[0].title).toBe("Keep me");
   });
 
   async function openDatabase() {
