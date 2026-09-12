@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { t } from "@/lib/i18n/t";
 import {
@@ -6,6 +7,7 @@ import {
   ensureDummyUsers,
 } from "@/server/auth/dummy/users";
 import { createPgliteDatabase } from "@/server/db/pglite";
+import { projects } from "@/server/db/schema";
 import { createPrompt } from "@/server/prompts/repository";
 import {
   acceptInvite,
@@ -48,6 +50,34 @@ describe("projects repository", () => {
         teamId: null,
       }),
     ]);
+  });
+
+  it("lists newer projects first and includes createdAt", async () => {
+    const db = await openDatabase();
+    const [personal] = await listProjects(db, agentId);
+    const older = await createProject(db, agentId, { name: "A-old" });
+    const newer = await createProject(db, agentId, { name: "Z-new" });
+    await db
+      .update(projects)
+      .set({ createdAt: new Date("2026-01-01T00:00:00.000Z") })
+      .where(eq(projects.id, personal.id));
+    await db
+      .update(projects)
+      .set({ createdAt: new Date("2026-01-02T00:00:00.000Z") })
+      .where(eq(projects.id, older.id));
+    await db
+      .update(projects)
+      .set({ createdAt: new Date("2026-01-03T00:00:00.000Z") })
+      .where(eq(projects.id, newer.id));
+
+    const listed = await listProjects(db, agentId);
+    expect(listed.map((project) => project.id)).toEqual([
+      newer.id,
+      older.id,
+      personal.id,
+    ]);
+    expect(listed[2]?.name).toBe(t("project.defaultName"));
+    expect(listed[0]?.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   it("creates a personal project and lists it for the owner only", async () => {

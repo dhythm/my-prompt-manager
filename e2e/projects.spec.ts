@@ -13,6 +13,30 @@ test("creates a project and copies a prompt with version history", async ({
     page.getByRole("heading", { name: "プロジェクト", level: 1 }),
   ).toBeVisible();
   await expect(page.getByPlaceholder("プロジェクト名")).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "プロジェクト" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("cell", { name: "デフォルト", exact: true }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "名前を変更" }).first().click();
+  const renameDialog = page.getByRole("dialog");
+  await expect(renameDialog).toBeVisible();
+  const dialogBox = await renameDialog.boundingBox();
+  const viewport = page.viewportSize();
+  expect(dialogBox).toBeTruthy();
+  expect(viewport).toBeTruthy();
+  if (dialogBox && viewport) {
+    const centerX = dialogBox.x + dialogBox.width / 2;
+    const centerY = dialogBox.y + dialogBox.height / 2;
+    expect(Math.abs(centerX - viewport.width / 2)).toBeLessThan(48);
+    expect(Math.abs(centerY - viewport.height / 2)).toBeLessThan(80);
+  }
+  await page.screenshot({
+    path: path.join(outputDir, "project-rename-dialog.png"),
+  });
+  await renameDialog.getByRole("button", { name: "キャンセル" }).click();
 
   const development = `開発 ${Date.now()}`;
   const production = `本番 ${Date.now()}`;
@@ -94,8 +118,8 @@ async function createProject(page: Page, name: string) {
       response.url().includes("/api/projects") &&
       response.request().method() === "POST",
   );
-  await page.getByRole("button", { name: "プロジェクトを作成" }).click();
+  await page.getByRole("button", { name: "作成", exact: true }).click();
   expect((await created).ok()).toBeTruthy();
-  await expect(page.locator(`input[value="${name}"]`)).toBeVisible();
+  await expect(page.getByRole("cell", { name, exact: true })).toBeVisible();
   await expect(nameField).toHaveValue("");
 }

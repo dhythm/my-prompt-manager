@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { t } from "@/lib/i18n/t";
+import { toClientProject } from "@/lib/projects/serialize";
 import { errorResponse, unauthorized } from "@/server/api/respond";
 import { getCurrentUser } from "@/server/auth/current-user";
 import { getDb } from "@/server/db/client";
@@ -21,13 +22,7 @@ export async function PATCH(
     const db = await getDb();
     const project = await renameProject(db, user.id, id, input);
     return NextResponse.json({
-      project: {
-        id: project.id,
-        name: project.name,
-        ownerUserId: project.ownerUserId,
-        teamId: project.teamId,
-        teamName: null,
-      },
+      project: toClientProject({ ...project, teamName: null }),
     });
   } catch (error) {
     return errorResponse(error, t("error.projectRenameFailed"));

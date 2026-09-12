@@ -2,6 +2,7 @@ import {
   and,
   asc,
   count,
+  desc,
   eq,
   inArray,
   isNotNull,
@@ -209,13 +210,14 @@ async function selectVisibleProjects(db: AppDatabase, userId: string) {
     .from(teamMembers)
     .where(eq(teamMembers.userId, userId));
 
-  return db
+  const rows = await db
     .select({
       id: projects.id,
       name: projects.name,
       ownerUserId: projects.ownerUserId,
       teamId: projects.teamId,
       teamName: teams.name,
+      createdAt: projects.createdAt,
     })
     .from(projects)
     .leftJoin(teams, eq(teams.id, projects.teamId))
@@ -225,5 +227,10 @@ async function selectVisibleProjects(db: AppDatabase, userId: string) {
         and(isNotNull(projects.teamId), inArray(projects.teamId, memberTeams)),
       ),
     )
-    .orderBy(asc(projects.name), asc(projects.id));
+    .orderBy(desc(projects.createdAt), desc(projects.id));
+
+  return rows.map((row) => ({
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+  }));
 }

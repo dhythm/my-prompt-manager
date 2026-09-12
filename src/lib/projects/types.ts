@@ -4,6 +4,7 @@ export type Project = {
   ownerUserId: string | null;
   teamId: string | null;
   teamName: string | null;
+  createdAt: string;
 };
 
 export type CreateProjectInput = {

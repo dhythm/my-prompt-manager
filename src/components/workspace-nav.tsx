@@ -83,7 +83,7 @@ export function WorkspaceNav() {
         </SideLink>
       </nav>
 
-      {workspaceProjects.length > 1 ? (
+      {workspaceProjects.length > 0 ? (
         <SidebarSelect
           label={t("project.switcher")}
           value={projectId}
