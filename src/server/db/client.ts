@@ -4,8 +4,8 @@ import {
 } from "@/server/auth/dummy/users";
 import { resolveAuthConfig } from "@/server/auth/env";
 import { isPgliteDemo } from "@/server/dummy/demo";
+import { resetAndSeed } from "@/server/dummy/reset";
 import { backfillPromptOwnership } from "@/server/prompts/backfill";
-import { ensureSamplePrompts } from "@/server/prompts/seed-samples";
 import { resolveDatabaseConfig } from "./env";
 import { createPgliteDatabase } from "./pglite";
 import { createPostgresDatabase } from "./postgres";
@@ -31,7 +31,7 @@ async function createDatabase(
     await backfillPromptOwnership(db);
   }
   if (isPgliteDemo(env)) {
-    await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+    await resetAndSeed(db, DUMMY_DEFAULT_USER_ID);
   }
 
   return db;

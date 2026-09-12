@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { DUMMY_DEFAULT_USER_ID } from "@/server/auth/dummy/users";
 import { dummyDemoResetAllowed } from "@/server/auth/env";
 import { getDb } from "@/server/db/client";
-import { ensureSamplePrompts } from "@/server/prompts/seed-samples";
+import { resetAndSeed } from "@/server/dummy/reset";
 
 export async function POST() {
   if (!dummyDemoResetAllowed()) {
@@ -10,6 +10,6 @@ export async function POST() {
   }
 
   const db = await getDb();
-  await ensureSamplePrompts(db, DUMMY_DEFAULT_USER_ID);
+  await resetAndSeed(db, DUMMY_DEFAULT_USER_ID);
   return NextResponse.json({ ok: true });
 }
