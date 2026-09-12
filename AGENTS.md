@@ -103,23 +103,23 @@ fad research, exploration, and parallel analysis to subagents
 
 - use `pnpm` as a package manager
 - use `vitest` for testing
-- default database is PGlite at `.data/pglite` (no Docker / DATABASE_URL required)
-- dummy auth + PGlite seeds sample prompts and runs so local/agent checks start from a known catalog; Postgres (Neon, Supabase, Docker) does not seed
+- agents MUST use `pnpm dev:agent` (PGlite, no Docker). Do not run `pnpm dev` — that starts Docker Postgres
+- dummy auth + PGlite: `pnpm dev:agent` full-resets and seeds sample prompts/runs on each process start. Postgres (Neon, Supabase, Docker) does not auto-seed; humans run `pnpm db:seed` / `pnpm db:seed:reset`
 - set `DATABASE_URL` (postgres/postgresql) to use PostgreSQL, Neon, or Supabase
 - client-to-server reads go through Route Handlers and TanStack Query; do not use Server Actions as `queryFn`
-- take UI screenshots with Playwright (`pnpm screenshot`) or agent-browser; first time run `pnpm browser:install`
+- take UI screenshots with Playwright (`pnpm screenshot`) or agent-browser against `pnpm dev:agent`; first time run `pnpm browser:install`
 - default auth is dummy accounts (Agent / Developer). Do not require Clerk in local or agent environments
 - set AUTH_PROVIDER=clerk only when Clerk keys are present
 
 ### Screenshots
 
-Playwright starts the app if needed and writes PNGs to `e2e/output/`:
+Playwright starts `pnpm dev:agent` if needed and writes PNGs to `e2e/output/`:
 
 ```bash
 pnpm screenshot
 ```
 
-agent-browser is for ad-hoc inspection while `pnpm dev` is already running:
+agent-browser is for ad-hoc inspection while `pnpm dev:agent` is already running:
 
 ```bash
 pnpm exec agent-browser open http://127.0.0.1:3000
