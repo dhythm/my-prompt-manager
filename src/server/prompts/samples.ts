@@ -2,7 +2,7 @@ import type { PromptModelId } from "@/lib/prompts/models";
 import type { PromptRunSource } from "@/lib/prompts/types";
 import type { PromptMessageInput } from "./versions";
 
-export type SampleRun = {
+type SampleRun = {
   id: string;
   source: PromptRunSource;
   output: string;

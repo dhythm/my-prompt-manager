@@ -45,10 +45,17 @@ async function openDedicatedDatabase(
 }
 
 async function closeDedicatedDatabase(db: AppDatabase) {
-  const client = db.$client as {
-    close?: () => Promise<void>;
-    end?: () => Promise<void>;
-  };
+  const client = (
+    db as unknown as {
+      $client?: {
+        close?: () => Promise<void>;
+        end?: () => Promise<void>;
+      };
+    }
+  ).$client;
+  if (!client) {
+    return;
+  }
   if (typeof client.close === "function") {
     await client.close();
     return;

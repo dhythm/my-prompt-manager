@@ -24,7 +24,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm dev:agent",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
@@ -32,6 +32,7 @@ export default defineConfig({
       ...process.env,
       PORT: String(port),
       PROMPT_LLM_MODE: "stub",
+      DATABASE_DRIVER: "pglite",
     },
   },
 });

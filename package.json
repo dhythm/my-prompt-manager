@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "tsx scripts/dev.ts",
+    "dev:agent": "DATABASE_DRIVER=pglite next dev",
     "build": "next build",
     "start": "next start",
     "lint": "biome ci .",
@@ -18,6 +19,8 @@
     "browser:install": "playwright install chromium && agent-browser install",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --require tsconfig-paths/register scripts/db-seed.ts",
+    "db:seed:reset": "tsx --require tsconfig-paths/register scripts/db-seed.ts --reset",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -32,6 +35,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.12",
+    "@next/env": "16.3.4",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.1",
@@ -42,6 +46,8 @@
     "drizzle-kit": "1.0.0-rc.4",
     "knip": "^6.35.0",
     "tailwindcss": "^4",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.0"
   },
