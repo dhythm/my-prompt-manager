@@ -30,10 +30,10 @@
 Sequence:
 
 1. `docker compose up -d --wait` (existing `postgres` healthcheck).
-2. `pnpm db:migrate`.
-3. `next dev` with `DATABASE_DRIVER=postgres`.
+2. `pnpm db:migrate` with `DATABASE_DRIVER=postgres` (and the local `DATABASE_URL`) so drizzle-kit cannot fall through to PGlite if `.env` is missing or unread.
+3. `next dev` with the same `DATABASE_DRIVER=postgres` and `DATABASE_URL`.
 
-`DATABASE_URL` comes from `.env` (local Docker URL). Docker Compose already reads `POSTGRES_*` from `.env`.
+`DATABASE_URL` comes from `.env` (local Docker URL). Docker Compose already reads `POSTGRES_*` from `.env`. The `dev` script still exports `DATABASE_DRIVER=postgres` for both migrate and Next.
 
 On Docker missing, compose failure, healthcheck timeout, or migrate failure: exit non-zero. Do not start Next and do not open PGlite.
 
@@ -93,9 +93,10 @@ Caller: `pnpm db:seed`. CLI exits `1` and prints that the catalog is not empty (
 - Load env via Next's `loadEnvConfig` so `.env` is honored without a new dependency.
 - Use `resolveDatabaseConfig` / `resolveAuthConfig`.
 - Refuse unless auth provider is dummy (Clerk → error, no writes).
+- Open a **dedicated** connection with `createPgliteDatabase` / `createPostgresDatabase`. Do **not** call `getDb()`: on PGlite, `getDb()` runs `resetAndSeed` on first init and would break `seedIfEmpty`.
 - Connect with the current driver (human `.env` → Postgres; `DATABASE_DRIVER=pglite` → PGlite).
 
-Implementation sketch: `scripts/db-seed.ts` run with Node type stripping (`node --experimental-strip-types`), argv `--reset` for the reset script.
+Entry: `scripts/db-seed.ts` with relative imports into `src/` (no `@/` in the script; this package is not `"type": "module"` and path aliases will not resolve under raw `node --experimental-strip-types`). Run with `tsx` (add as a devDependency) and argv `--reset` for `db:seed:reset`.
 
 ## Error handling
 
@@ -113,9 +114,10 @@ Implementation sketch: `scripts/db-seed.ts` run with Node type stripping (`node 
 TDD on the reset/seed module before wiring scripts:
 
 - `resetAndSeed` after creating an arbitrarily named team/prompt removes them and restores the sample catalog.
-- `resetAndSeed` twice yields the same catalog.
+- `resetAndSeed` twice yields the same catalog. Compare prompt/run ids and content, not `Date.now()` timestamps or the default project's generated UUID.
 - `seedIfEmpty` on an empty DB inserts the catalog.
 - `seedIfEmpty` when any prompt exists does not insert, delete, or modify rows.
+- Keep catalog-content assertions in `samples.test.ts` (titles, run sources); retarget them at `resetAndSeed` / the insert helper. Drop only leftover-name tests.
 - Existing `isPgliteDemo` / `dummyDemoResetAllowed` / `resolveDatabaseConfig` behavior stays (PGlite still wins when `DATABASE_DRIVER=pglite` even if `DATABASE_URL` is set).
 - e2e `reset-demo.spec.ts` remains valid: a timestamped team disappears after `POST /api/dev/reset-demo`.
 - Playwright still sees the seeded title `気まずいメールを整える` via `pnpm dev:agent`.
@@ -137,7 +139,8 @@ Drop tests that only exist to assert leftover-name cleanup.
 - `src/server/prompts/seed-samples.ts` — insert catalog only; leftover deletion removed
 - New reset/orchestrator module (e.g. `src/server/dummy/reset.ts` + seed helpers)
 - `src/app/api/dev/reset-demo/route.ts` — call `resetAndSeed`
-- `scripts/db-seed.ts`
+- `scripts/db-seed.ts` (relative imports, run via `tsx`)
+- `package.json` devDependency `tsx`
 - Delete leftover-only helpers if nothing else imports them (`cleanup.ts` leftover path, `leftovers.ts`, leftover titles used only for seed)
 - `README.md`, `AGENTS.md`
 - Tests listed above
